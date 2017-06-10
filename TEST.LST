@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 5.00                  5/28/17 22:55:44
+Microsoft (R) Macro Assembler Version 5.00                  6/11/17 00:58:23
                                                              Page     1-1
 
 
@@ -15,7 +15,7 @@
        73 74 72 69 6E 67	
  002A  0B35			    Word1 dw 0cfh*1110b-29d 
  002C  9F4EB26F			    Dword1 dd 6fb24e9fh 
- 0030  00000114 R		    addr1 dd l8 
+ 0030  00000115 R		    addr1 dd l8 
  0034				Data ends 
 				 
  = 0055				equ1 equ 01010101b 
@@ -31,8 +31,8 @@
  0000				Begin: 
  0000  F8			    clc 
 				 
- 0001  EB 36 90 90 90		    jmp l1 
- 0006  0F 83 000000E0 R		    jae l6 
+ 0001  EB 37 90 90 90		    jmp l1 
+ 0006  0F 83 000000E1 R		    jae l6 
 				 
  000C  2E: FE 0C18		    dec byte ptr cs:[eax+ebx] 
  0010  66| FF 4C11 02		    dec word ptr ds:[ecx+edx+2] 
@@ -40,76 +40,76 @@
  001B  2E: 66| FF 4C11 06	    dec word ptr cs:[ecx+edx+6] 
  0021  FF 4C11 08		    dec dword ptr ds:[ecx+edx+8] 
  0025  26: FF 4C11 0A		    dec dword ptr es:[ecx+edx+10] 
- 002A  66| FF 8C00 0000002A	    dec Word1[eax+eax] 
-	R			
- 0032  FF 8C3E 0000002E R	    dec Dword1[esi+edi+2] 
- 0039				l1: 
- 0039  02 C3			    add al, bl 
- 003B  02 CA			    add cl, dl 
- 003D  03 C0			    add eax, eax 
- 003F  03 F7			    add esi, edi 
+ 002A  26: 66| FF 8C00 0000	    dec es:Word1[eax+eax] 
+       002A R			
+ 0033  FF 8C3E 0000002E R	    dec Dword1[esi+edi+2] 
+ 003A				l1: 
+ 003A  02 C3			    add al, bl 
+ 003C  02 CA			    add cl, dl 
+ 003E  03 C0			    add eax, eax 
+ 0040  03 F7			    add esi, edi 
 				 
- 0041  EB 08 90 90 90		    jmp near ptr l2 
- 0046  EB 0D 90 90 90		    jmp near ptr l3 
+ 0042  EB 08 90 90 90		    jmp near ptr l2 
+ 0047  EB 0D 90 90 90		    jmp near ptr l3 
 				 
- 004B  F6 F8			l2: idiv al 
- 004D  F6 FF			    idiv bh 
- 004F  F7 F8			    idiv eax 
- 0051  F7 FA			    idiv edx 
-Microsoft (R) Macro Assembler Version 5.00                  5/28/17 22:55:44
+ 004C  F6 F8			l2: idiv al 
+ 004E  F6 FF			    idiv bh 
+ 0050  F7 F8			    idiv eax 
+ 0052  F7 FA			    idiv edx 
+Microsoft (R) Macro Assembler Version 5.00                  6/11/17 00:58:23
                                                              Page     1-2
 
 
- 0053  F7 FE			    idiv esi 
- 0055				l3: 
- 0055  2E: 3A 3C0E		    cmp bh, byte ptr cs:[esi+ecx] 
- 0059  26: 3A 0C30		    cmp cl, byte ptr es:[eax+esi] 
- 005D  3A 543F 02		    cmp dl, byte ptr ds:[edi+edi+2] 
- 0061  2E: 3B 4418 04		    cmp eax, dword ptr cs:[eax+ebx+4] 
- 0066  2E: 3B 5C13 04		    cmp ebx, dword ptr cs:[ebx+edx+4] 
- 006B  3B 743B 06		    cmp esi, dword ptr ds:[ebx+edi+6] 
- 006F  26: 3B 743B 06		    cmp esi, dword ptr es:[ebx+edi+6] 
- 0074  3A 8403 00000000 R	    cmp al, Byte1[ebx+eax] 
- 007B  3A B432 00000008 R	    cmp dh, Byte1[edx+esi+8] 
- 0082				l4: 
- 0082  2E: 80 240E 2F		    and byte ptr cs:[esi+ecx], 101111b 
- 0087  2E: 80 2418 19		    and byte ptr cs:[eax+ebx], 25 
- 008C  26: 80 2418 30		    and byte ptr es:[eax+ebx], 48d 
- 0091  2E: 80 240B 2F		    and byte ptr cs:[ebx+ecx], 101111b 
- 0096  26: 80 240B 55		    and byte ptr es:[ebx+ecx], equ1 
- 009B  66| 81 2418 74A2		    and word ptr ds:[eax+ebx], 74a2h 
- 00A1  2E: 66| 81 641A 02	    and word ptr cs:[edx+ebx+2], 2544h 
+ 0054  F7 FE			    idiv esi 
+ 0056				l3: 
+ 0056  2E: 3A 3C0E		    cmp bh, byte ptr cs:[esi+ecx] 
+ 005A  26: 3A 0C30		    cmp cl, byte ptr es:[eax+esi] 
+ 005E  3A 543F 02		    cmp dl, byte ptr ds:[edi+edi+2] 
+ 0062  2E: 3B 4418 04		    cmp eax, dword ptr cs:[eax+ebx+4] 
+ 0067  2E: 3B 5C13 04		    cmp ebx, dword ptr cs:[ebx+edx+4] 
+ 006C  3B 743B 06		    cmp esi, dword ptr ds:[ebx+edi+6] 
+ 0070  26: 3B 743B 06		    cmp esi, dword ptr es:[ebx+edi+6] 
+ 0075  3A 8403 00000000 R	    cmp al, Byte1[ebx+eax] 
+ 007C  3A B432 00000008 R	    cmp dh, Byte1[edx+esi+8] 
+ 0083				l4: 
+ 0083  2E: 80 240E 2F		    and byte ptr cs:[esi+ecx], 101111b 
+ 0088  2E: 80 2418 19		    and byte ptr cs:[eax+ebx], 25 
+ 008D  26: 80 2418 30		    and byte ptr es:[eax+ebx], 48d 
+ 0092  2E: 80 240B 2F		    and byte ptr cs:[ebx+ecx], 101111b 
+ 0097  26: 80 240B 55		    and byte ptr es:[ebx+ecx], equ1 
+ 009C  66| 81 2418 74A2		    and word ptr ds:[eax+ebx], 74a2h 
+ 00A2  2E: 66| 81 641A 02	    and word ptr cs:[edx+ebx+2], 2544h 
        2544			
- 00A9  81 6410 04 00000214	    and dword ptr ds:[eax+edx+4], equ5 
- 00B1  81 A407 00000001 R	    and dword ptr String1[edi+eax], equ2 
+ 00AA  81 6410 04 00000214	    and dword ptr ds:[eax+edx+4], equ5 
+ 00B2  81 A407 00000001 R	    and dword ptr String1[edi+eax], equ2 
        31323334			
- 00BC  81 A436 00000001 R	    and dword ptr String1[esi+esi], 5a7d4h 
+ 00BD  81 A436 00000001 R	    and dword ptr String1[esi+esi], 5a7d4h 
        0005A7D4			
- 00C7  81 A418 00000030 R	    and dword ptr Word1[eax+ebx+6], 112233h 
+ 00C8  81 A418 00000030 R	    and dword ptr Word1[eax+ebx+6], 112233h 
        00112233			
- 00D2				l5: 
- 00D2  0F 83 00000000 R		    jae Begin 
- 00D8  73 A8			    jae l4 
- 00DA  0F 83 000000E0 R		    jae l6 
+ 00D3				l5: 
+ 00D3  0F 83 00000000 R		    jae Begin 
+ 00D9  73 A8			    jae l4 
+ 00DB  0F 83 000000E1 R		    jae l6 
 				 
- 00E0  B0 61			l6: mov al, 'a' 
- 00E2  B4 01			    mov ah, 1 
- 00E4  B3 0F			    mov bl, 0fh 
- 00E6  B8 000A8C4B		    mov eax, equ6 
- 00EB  BF 00000001		    mov edi, 1d 
- 00F0  BF 000FFFFF		    mov edi, 0FFFFFh 
+ 00E1  B0 61			l6: mov al, 'a' 
+ 00E3  B4 01			    mov ah, 1 
+ 00E5  B3 0F			    mov bl, 0fh 
+ 00E7  B8 000A8C4B		    mov eax, equ6 
+ 00EC  BF 00000001		    mov edi, 1d 
+ 00F1  BF 000FFFFF		    mov edi, 0FFFFFh 
 				 
- 00F5  EB 08 90 90 90		    jmp l7 
- 00FA  EB 18 90 90 90		    jmp l8 
- 00FF				l7: 
- 00FF  30 1C03			    xor byte ptr ds:[ebx+eax], bl 
- 0102  31 5C32 02		    xor dword ptr ds:[edx+esi+2], ebx 
- 0106  30 9439 00000000 R	    xor Byte1[ecx+edi], dl 
- 010D  31 8C31 00000030 R	    xor Dword1[ecx+esi+4], ecx 
- 0114				l8: 
- 0114				Code ends 
+ 00F6  EB 08 90 90 90		    jmp l7 
+ 00FB  EB 18 90 90 90		    jmp l8 
+ 0100				l7: 
+ 0100  30 1C03			    xor byte ptr ds:[ebx+eax], bl 
+ 0103  31 5C32 02		    xor dword ptr ds:[edx+esi+2], ebx 
+ 0107  30 9439 00000000 R	    xor Byte1[ecx+edi], dl 
+ 010E  31 8C31 00000030 R	    xor Dword1[ecx+esi+4], ecx 
+ 0115				l8: 
+ 0115				Code ends 
 				end Begin 
-Microsoft (R) Macro Assembler Version 5.00                  5/28/17 22:55:44
+Microsoft (R) Macro Assembler Version 5.00                  6/11/17 00:58:23
                                                              Symbols-1
 
 
@@ -117,7 +117,7 @@
 
                 N a m e         	Size	Length	 Align	Combine Class
 
-CODE . . . . . . . . . . . . . .  	32 Bit	0114	PARA	NONE	
+CODE . . . . . . . . . . . . . .  	32 Bit	0115	PARA	NONE	
 DATA . . . . . . . . . . . . . .  	32 Bit	0034	PARA	NONE	
 
 Symbols:            
@@ -138,14 +138,14 @@ EQU4 . . . . . . . . . . . . . .  	NUMBER	028E
 EQU5 . . . . . . . . . . . . . .  	NUMBER	0214	
 EQU6 . . . . . . . . . . . . . .  	NUMBER	000A8C4B 
 
-L1 . . . . . . . . . . . . . . .  	L NEAR	0039	CODE
-L2 . . . . . . . . . . . . . . .  	L NEAR	004B	CODE
-L3 . . . . . . . . . . . . . . .  	L NEAR	0055	CODE
-L4 . . . . . . . . . . . . . . .  	L NEAR	0082	CODE
-L5 . . . . . . . . . . . . . . .  	L NEAR	00D2	CODE
-L6 . . . . . . . . . . . . . . .  	L NEAR	00E0	CODE
-L7 . . . . . . . . . . . . . . .  	L NEAR	00FF	CODE
-L8 . . . . . . . . . . . . . . .  	L NEAR	0114	CODE
+L1 . . . . . . . . . . . . . . .  	L NEAR	003A	CODE
+L2 . . . . . . . . . . . . . . .  	L NEAR	004C	CODE
+L3 . . . . . . . . . . . . . . .  	L NEAR	0056	CODE
+L4 . . . . . . . . . . . . . . .  	L NEAR	0083	CODE
+L5 . . . . . . . . . . . . . . .  	L NEAR	00D3	CODE
+L6 . . . . . . . . . . . . . . .  	L NEAR	00E1	CODE
+L7 . . . . . . . . . . . . . . .  	L NEAR	0100	CODE
+L8 . . . . . . . . . . . . . . .  	L NEAR	0115	CODE
 
 STRING1  . . . . . . . . . . . .  	L BYTE	0001	DATA
 

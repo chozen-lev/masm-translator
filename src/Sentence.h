@@ -6,27 +6,28 @@
 
 class Sentence
 {
+    friend class Operand;
+    friend class LexicalAnalyzer;
+    friend class SyntaxAnalyzer;
+
 private:
-    std::vector<Token> m_Tokens;
+    std::string m_OriginalCode;
+    std::string m_Line;
+    std::vector<Token*> m_Tokens;
 
-    Label m_Label;
-    Token m_Command;
-    std::vector<Operand> m_Operands;
+    unsigned int m_lineNum;
 
-    unsigned int m_Offset;
-    unsigned int m_SentenceSize;
+    Label *m_Label;
+    Token *m_Mnem;
+    std::vector<Operand*> m_Operands;
 
-    std::string m_ModRm;
-    std::string m_Sib;
-    std::string m_Displacepment;
-    std::string m_Imm;
-
-    void divideSentence();
-    void generateAttributes();
+    std::string m_Warning;
+    std::string m_Error;
 
 public:
-    Sentence(const std::vector<Token> &);
+    Sentence(unsigned int, std::string);
     ~Sentence() {};
 
-    void getSize() {};
-};  
+    std::vector<Token*> getTokens() const;
+    std::string getError() const;
+};

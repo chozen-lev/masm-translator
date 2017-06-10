@@ -4,6 +4,7 @@
 
 enum class TokenType
 {
+    NONE,
     IDENTIFIER,
     COMMAND,
     TYPE,
@@ -20,29 +21,51 @@ enum class TokenType
     WRONG_LEXEM
 };
 
-enum class OpType
+enum class AnalyzeType
 {
-    REG8,
-    REG32,
-    IMM,
-    MEM
+    NONE,
+    WARNING,
+    ERROR
+};
+
+enum class LabelType
+{
+    NONE,
+    NUMBER,
+    LBYTE,
+    LWORD,
+    LDWORD,
+    LNEAR,
+    LFAR,
+    SEGMENT
 };
 
 struct Token
 {
     std::string name;
     TokenType type;
+    unsigned int number;
+    Token(): type(TokenType::NONE), number(0) {};
+    Token(std::string _name, TokenType _type, unsigned int _number): name(_name), type(_type), number(_number) {};
 };
 
 struct Segment
 {
-    std::string name;
+    Token *token;
     unsigned int length;
+
+    Segment(): token(nullptr), length(0) {}
 };
 
 struct Label
 {
-    Token token;
+    Token *token;
+    LabelType type;
     unsigned int value;
-    std::string segName;
+    Segment *segment;
+
+    Label(Token *_token): token(_token), type(LabelType::NONE), value(0), segment(nullptr) {}
+    Label(): token(nullptr), type(LabelType::NONE), value(0), segment(nullptr) {}
 };
+
+typedef unsigned char byte;

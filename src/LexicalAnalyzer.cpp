@@ -1,55 +1,12 @@
 #include <regex>
+#include <iostream>
 
+#include "Sentence.h"
 #include "LexicalAnalyzer.h"
-
-void LexicalAnalyzer::analyzeLine(std::string &line)
-{
-    parseLine(line);
-    analyzeLexems(m_Lexems.back());
-}
 
 std::regex regex_lexems("(\"[^\"]*\"|'[^']*'|[\\w]+|\\d+|[,:\\(\\)\\[\\]\\*+-;])");
 
-void LexicalAnalyzer::parseLine(std::string &line)
-{
-    size_t lastIndex;
-    char lastQuote = 0; 
-
-    for (lastIndex = 0; lastIndex < line.length(); ++lastIndex) {
-        if (lastQuote)
-        {
-            if (line[lastIndex] == lastQuote) {
-                lastQuote = 0;
-            }
-            continue;
-        }
-        else if (line[lastIndex] == ';') {
-            break;
-        }
-        else if (line[lastIndex] == '"' || line[lastIndex] == '\'')
-        {
-            lastQuote = line[lastIndex];
-            continue;
-        }
-
-        line[lastIndex] = toupper(line[lastIndex]);
-    }
-
-    std::smatch result;
-    std::string::const_iterator searchStart(line.cbegin());
-
-    m_Lexems.push_back(std::vector<std::string>());
-
-    while (regex_search(searchStart, line.cbegin() + lastIndex, result, regex_lexems))
-    {
-        searchStart += result.position() + result.length();
-        m_Lexems.back().push_back(result[0]);
-    }
-
-    m_Code.push_back(line);
-}
-
-std::regex regex_string("(\"[^\"]*\"|'[^]*')");
+std::regex regex_string("(\"[^\"]*\"|'[^']*')");
 std::regex regex_binary("([01]+B)");
 std::regex regex_hex("([0-9]{1}[A-F0-9]*H)");
 std::regex regex_dec("([0-9]+D?)");
@@ -61,63 +18,92 @@ std::regex regex_type("(BYTE|WORD|DWORD)");
 std::regex regex_segment("(CS|DS|SS|ES|FS|GS)");
 std::regex regex_directive("(END|SEGMENT|ENDS|EQU|DB|DW|DD)");
 std::regex regex_singlechar("([,:()\\[\\]\\*+-]{1})");
-std::regex regex_idendifier("([A-Z_@?$]{1}[A-Z0-9_@?$]*)");
+std::regex regex_idendifier("([A-Z_@?$]{1}[A-Z0-9_@?$]{0,6})");
 
-void LexicalAnalyzer::analyzeLexems(std::vector<std::string> &lexems)
+void LexicalAnalyzer::analyzeLine(Sentence *sentence)
 {
-    m_Tokens.push_back(std::vector<Token>());
-    std::vector<std::vector<Token>>::iterator vecToken = m_Tokens.end() - 1;
+    if (sentence->m_OriginalCode.empty()) {
+        return;
+    }
 
-    for (std::vector<std::string>::iterator lex = lexems.begin(); lex != lexems.end(); ++lex)
+    unsigned int lastIndex;
+    char lastQuote = 0;
+
+    for (lastIndex = 0; lastIndex < sentence->m_Line.length(); ++lastIndex)
     {
-        vecToken->push_back(Token());
-
-        if (std::regex_match(lex->c_str(), regex_string))
+        if (lastQuote)
         {
-            vecToken->back().type = TokenType::CONST_TEXT;
-            *lex = lex->substr(1, lex->size() - 2);
-        } else if (std::regex_match(lex->c_str(), regex_binary)) {
-            vecToken->back().type = TokenType::CONST_BIN;
-        } else if (std::regex_match(lex->c_str(), regex_hex)) {
-            vecToken->back().type = TokenType::CONST_HEX;
-        } else if (std::regex_match(lex->c_str(), regex_dec)) {
-            vecToken->back().type = TokenType::CONST_DEC;
-        } else if (std::regex_match(lex->c_str(), regex_reg8)) {
-            vecToken->back().type = TokenType::REG8;
-        } else if (std::regex_match(lex->c_str(), regex_reg32)) {
-            vecToken->back().type = TokenType::REG32;
-        } else if (std::regex_match(lex->c_str(), regex_command)) {
-            vecToken->back().type = TokenType::COMMAND;
-        } else if (std::regex_match(lex->c_str(), regex_operator)) {
-            vecToken->back().type = TokenType::OPERATOR;
-        } else if (std::regex_match(lex->c_str(), regex_type)) {
-            vecToken->back().type = TokenType::TYPE;
-        } else if (std::regex_match(lex->c_str(), regex_segment)) {
-            vecToken->back().type = TokenType::SEGMENT;
-        } else if (std::regex_match(lex->c_str(), regex_directive)) {
-            vecToken->back().type = TokenType::DIRECTIVE;
-        } else if (std::regex_match(lex->c_str(), regex_singlechar)) {
-            vecToken->back().type = TokenType::SINGLE_CHAR;
-        } else if (lex->length() <= 7 && std::regex_match(lex->c_str(), regex_idendifier)) {
-            vecToken->back().type = TokenType::IDENTIFIER;
-        } else {
-            vecToken->back().type = TokenType::WRONG_LEXEM;
+            if (sentence->m_Line[lastIndex] == lastQuote) {
+                lastQuote = 0;
+            }
+            continue;
+        }
+        else if (sentence->m_Line[lastIndex] == ';') {
+            break;
+        }
+        else if (sentence->m_Line[lastIndex] == '"' || sentence->m_Line[lastIndex] == '\'')
+        {
+            lastQuote = sentence->m_Line[lastIndex];
+            continue;
         }
 
-        vecToken->back().name = *lex;
+        sentence->m_Line[lastIndex] = toupper(sentence->m_Line[lastIndex]);
     }
-}
 
-const std::vector<std::string>& LexicalAnalyzer::getCodes() {
-    return m_Code;
-}
+    std::smatch result;
+    std::string::const_iterator searchStart(sentence->m_Line.cbegin());
+    Token *token;
+    unsigned int number = 0;
 
-const std::vector<std::vector<std::string>>& LexicalAnalyzer::getLexems() {
-    return m_Lexems;
-}
+    // std::cout << sentence->m_lineNum << ") " << "<" << sentence->m_OriginalCode << ">" << std::endl;
 
-const std::vector<std::vector<Token>>& LexicalAnalyzer::getTokens() {
-    return m_Tokens;
+    while (regex_search(searchStart, sentence->m_Line.cbegin() + lastIndex, result, regex_lexems))
+    {
+        searchStart += result.position() + result.length();
+        token = new Token;
+
+        token->name = result[0];
+
+        if (std::regex_match(token->name.c_str(), regex_string))
+        {
+            token->type = TokenType::CONST_TEXT;
+            token->name = token->name.substr(1, token->name.size() - 2);
+        } else if (std::regex_match(token->name.c_str(), regex_binary)) {
+            token->type = TokenType::CONST_BIN;
+        } else if (std::regex_match(token->name.c_str(), regex_hex)) {
+            token->type = TokenType::CONST_HEX;
+        } else if (std::regex_match(token->name.c_str(), regex_dec)) {
+            token->type = TokenType::CONST_DEC;
+        } else if (std::regex_match(token->name.c_str(), regex_reg8)) {
+            token->type = TokenType::REG8;
+        } else if (std::regex_match(token->name.c_str(), regex_reg32)) {
+            token->type = TokenType::REG32;
+        } else if (std::regex_match(token->name.c_str(), regex_command)) {
+            token->type = TokenType::COMMAND;
+        } else if (std::regex_match(token->name.c_str(), regex_operator)) {
+            token->type = TokenType::OPERATOR;
+        } else if (std::regex_match(token->name.c_str(), regex_type)) {
+            token->type = TokenType::TYPE;
+        } else if (std::regex_match(token->name.c_str(), regex_segment)) {
+            token->type = TokenType::SEGMENT;
+        } else if (std::regex_match(token->name.c_str(), regex_directive)) {
+            token->type = TokenType::DIRECTIVE;
+        } else if (std::regex_match(token->name.c_str(), regex_singlechar)) {
+            token->type = TokenType::SINGLE_CHAR;
+        } else if (std::regex_match(token->name.c_str(), regex_idendifier)) {
+            token->type = TokenType::IDENTIFIER;
+        } else {
+            token->type = TokenType::WRONG_LEXEM;
+        }
+
+        token->number = ++number;
+
+        sentence->m_Tokens.push_back(token);
+
+        // std::cout << token->number << ". " << token->name << " : " << typeString(token->type) << std::endl;
+    }
+
+    // std::cout << std::endl;
 }
 
 const std::string LexicalAnalyzer::typeString(TokenType type) const
@@ -149,7 +135,7 @@ const std::string LexicalAnalyzer::typeString(TokenType type) const
             return "Шістнадцяткова константа";
         }
         case TokenType::SINGLE_CHAR: {
-            return "односимвольна";
+            return "Односимвольна константа";
         }
         case TokenType::DIRECTIVE: {
             return "Ідентифікатор директиви";

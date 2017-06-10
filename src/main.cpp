@@ -1,10 +1,12 @@
 #include <iostream>
 #include <fstream>
 
+#include "Sentence.h"
 #include "LexicalAnalyzer.h"
 #include "SyntaxAnalyzer.h"
+#include "types.h"
 
-#define VERSION "17.5.28"
+#define VERSION "17.6.10"
 
 int main(int argc, char* argv[])
 {
@@ -66,25 +68,37 @@ int main(int argc, char* argv[])
     }
     else
     {
-        size_t lineNum = 0;
-
-        std::string line;
         std::ofstream FileListing(path_listing);
+        size_t lineNum = 0;
+        std::string line;
 
+        // analyzers
         LexicalAnalyzer LexAnalyzer;
         SyntaxAnalyzer SynAnalyzer;
+
+        // sentences with all attributes
+        std::vector<Sentence*> sentences;
+
+        // tables
+        std::vector<Label*> labels;
+        std::vector<Segment*> segments;
+
+        Segment *activeSeg = nullptr;
 
         while (getline(FileSource, line))
         {
             lineNum++;
-            if (line.empty()) {
-                continue;
+
+            sentences.push_back(new Sentence(lineNum, line));
+
+            LexAnalyzer.analyzeLine(sentences.back());
+            SynAnalyzer.analyzeStruct(sentences.back());
+
+            if (!sentences.back()->getError().empty()) {
+                std::cout << sentences.back()->getError() << std::endl;
             }
 
-            LexAnalyzer.analyzeLine(line);
-            SynAnalyzer.analyzeLine(line, LexAnalyzer.getTokens().back());
-
-            if (LexAnalyzer.getLexems().back().front().compare("END") == 0){
+            if (!sentences.back()->getTokens().empty() && sentences.back()->getTokens().front()->name.compare("END") == 0) {
                 break;
             }
         }

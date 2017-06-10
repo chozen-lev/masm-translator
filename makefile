@@ -1,7 +1,7 @@
 NAME = masm
 
-# COMPILER = g++
-COMPILER = icpc
+COMPILER = g++
+# COMPILER = icpc
 
 OBJECTS = main.cpp LexicalAnalyzer.cpp SyntaxAnalyzer.cpp Sentence.cpp Operand.cpp
 
@@ -14,9 +14,14 @@ CFLAGS += -std=c++17
 
 OBJ_LINUX = $(OBJECTS:%.cpp=$(BIN_DIR)/%.o)
 
-.PHONY: all clean
+.PHONY: all clean debug
 
 all: $(BIN_DIR) $(BIN_DIR)/$(NAME)
+
+debug: COMPILER = g++
+debug: CFLAGS += -g
+debug: $(BIN_DIR) clean $(BIN_DIR)/$(NAME)
+	gdb $(BIN_DIR)/$(NAME)
 
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
@@ -39,8 +44,9 @@ $(BIN_DIR)/SyntaxAnalyzer.o: src/SyntaxAnalyzer.cpp src/SyntaxAnalyzer.h src/Sen
 $(BIN_DIR)/Sentence.o: src/Sentence.cpp src/Sentence.h src/Operand.h src/types.h
 	$(COMPILER) $(CFLAGS) -o $@ -c $<
 
-$(BIN_DIR)/Operand.o: src/Operand.cpp src/Operand.h src/types.h
+$(BIN_DIR)/Operand.o: src/Operand.cpp src/Operand.h src/types.h src/ExprEvaluate.hpp
 	$(COMPILER) $(CFLAGS) -o $@ -c $<
 
 $(BIN_DIR)/$(NAME): $(OBJ_LINUX)
 	$(COMPILER) $(CFLAGS) $(OBJ_LINUX) -o $(BIN_DIR)/$(NAME)
+

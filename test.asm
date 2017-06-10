@@ -1,4 +1,4 @@
-.386
+;.386
 
 Data segment
     Byte1 db 200 
@@ -15,13 +15,13 @@ equ4 equ 654d
 equ5 equ 214h
 equ6 equ 0a8c4bh
 
-assume cs:Code, ds:Data
+;assume cs:Code, ds:Data
 
 Code segment
 Begin:
     clc
 
-    jmp l1
+    jae l1
     jae l6
 
     dec byte ptr cs:[eax+ebx]
@@ -38,8 +38,8 @@ l1:
     add eax, eax
     add esi, edi
 
-    jmp near ptr l2
-    jmp near ptr l3
+    jae near ptr l2
+    jae near ptr l3
 
 l2: idiv al
     idiv bh
@@ -81,8 +81,8 @@ l6: mov al, 'a'
     mov edi, 1d
     mov edi, 0FFFFFh
 
-    jmp l7
-    jmp l8
+    jae l7
+    jae l8
 l7:
     xor byte ptr ds:[ebx+eax], bl
     xor dword ptr ds:[edx+esi+2], ebx
