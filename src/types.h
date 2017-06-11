@@ -49,23 +49,16 @@ struct Token
     Token(std::string _name, TokenType _type, unsigned int _number): name(_name), type(_type), number(_number) {};
 };
 
-struct Segment
-{
-    Token *token;
-    unsigned int length;
-
-    Segment(): token(nullptr), length(0) {}
-};
+typedef unsigned char byte;
 
 struct Label
 {
     Token *token;
     LabelType type;
-    unsigned int value;
-    Segment *segment;
+    byte *value;
+    unsigned int bytesNum;
+    Label *segment;
 
-    Label(Token *_token): token(_token), type(LabelType::NONE), value(0), segment(nullptr) {}
-    Label(): token(nullptr), type(LabelType::NONE), value(0), segment(nullptr) {}
+    Label(Token *_token): token(_token), type(LabelType::NONE), value(nullptr), bytesNum(0), segment(nullptr) {}
+    Label(): token(nullptr), type(LabelType::NONE), value(nullptr), bytesNum(0), segment(nullptr) {}
 };
-
-typedef unsigned char byte;

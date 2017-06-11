@@ -4,9 +4,10 @@
 #include "Sentence.h"
 #include "LexicalAnalyzer.h"
 #include "SyntaxAnalyzer.h"
+#include "GrammarAnalyzer.h"
 #include "types.h"
 
-#define VERSION "17.6.10"
+#define VERSION "17.6.11"
 
 int main(int argc, char* argv[])
 {
@@ -75,15 +76,16 @@ int main(int argc, char* argv[])
         // analyzers
         LexicalAnalyzer LexAnalyzer;
         SyntaxAnalyzer SynAnalyzer;
+        GrammarAnalyzer GramAnalyzer;
 
         // sentences with all attributes
         std::vector<Sentence*> sentences;
 
         // tables
         std::vector<Label*> labels;
-        std::vector<Segment*> segments;
+        std::vector<Label*> segments;
 
-        Segment *activeSeg = nullptr;
+        Label *activeSeg = nullptr;// maybe stack of segments ?
 
         while (getline(FileSource, line))
         {
@@ -93,6 +95,7 @@ int main(int argc, char* argv[])
 
             LexAnalyzer.analyzeLine(sentences.back());
             SynAnalyzer.analyzeStruct(sentences.back());
+            GramAnalyzer.analyzeStruct(sentences.back(), activeSeg, labels, segments);
 
             if (!sentences.back()->getError().empty()) {
                 std::cout << sentences.back()->getError() << std::endl;

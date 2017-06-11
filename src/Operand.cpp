@@ -2,7 +2,7 @@
 #include "Sentence.h"
 #include <iostream>
 
-Operand::Operand(unsigned int index): m_iFirstLex(index), m_LexNum(0)
+Operand::Operand(unsigned int index): m_iFirstLex(index), m_LexNum(0), m_Register(nullptr), m_SizePtr(nullptr), m_SegPrefix(nullptr), m_Label(nullptr), m_AddrReg1(nullptr), m_AddrReg2(nullptr), m_Const(nullptr)
 {
 
 }
@@ -30,10 +30,15 @@ void Operand::analyzeAttributes(Sentence *sentence)
         return;
     }
 
-    // memory
-    if ((*token)->type == TokenType::TYPE)
+    if ((*token)->type == TokenType::OPERATOR)
     {
-        if (token + 1 == end)
+        sentence->m_Error = "Syntax error on line " + std::to_string(sentence->m_lineNum);
+        return;
+    }
+    // memory
+    else if ((*token)->type == TokenType::TYPE)
+    {
+        if (token + 1 == end || (*(token + 1))->type != TokenType::OPERATOR)
         {
             sentence->m_Error = "Syntax error on line " + std::to_string(sentence->m_lineNum);
             return;
@@ -57,7 +62,7 @@ void Operand::analyzeAttributes(Sentence *sentence)
 
     if (token != end && (*token)->type == TokenType::IDENTIFIER)
     {
-        m_Label = *token;
+        m_Label = new Label(*token);
         token++;
     }
 
@@ -129,6 +134,7 @@ void Operand::analyzeAttributes(Sentence *sentence)
             sentence->m_Error = "Syntax error on line " + std::to_string(sentence->m_lineNum);
             return;
         }
+        token++;
     }
 
     if (token != end && ((*token)->name == "+" || (*token)->name == "-" || (*token)->name == "(" ||
@@ -153,5 +159,11 @@ void Operand::analyzeAttributes(Sentence *sentence)
             sentence->m_Error = "Syntax error on line " + std::to_string(sentence->m_lineNum);
             return;
         }
+    }
+
+    if (token != end)
+    {
+        sentence->m_Error = "Syntax error on line " + std::to_string(sentence->m_lineNum);
+        return;
     }
 }

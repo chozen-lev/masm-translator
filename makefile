@@ -3,7 +3,7 @@ NAME = masm
 COMPILER = g++
 # COMPILER = icpc
 
-OBJECTS = main.cpp LexicalAnalyzer.cpp SyntaxAnalyzer.cpp Sentence.cpp Operand.cpp
+OBJECTS = main.cpp LexicalAnalyzer.cpp SyntaxAnalyzer.cpp Sentence.cpp Operand.cpp GrammarAnalyzer.cpp
 
 OPT_FLAGS = -O3
 
@@ -45,6 +45,9 @@ $(BIN_DIR)/Sentence.o: src/Sentence.cpp src/Sentence.h src/Operand.h src/types.h
 	$(COMPILER) $(CFLAGS) -o $@ -c $<
 
 $(BIN_DIR)/Operand.o: src/Operand.cpp src/Operand.h src/types.h src/ExprEvaluate.hpp
+	$(COMPILER) $(CFLAGS) -o $@ -c $<
+
+$(BIN_DIR)/GrammarAnalyzer.o: src/GrammarAnalyzer.cpp src/GrammarAnalyzer.h src/types.h
 	$(COMPILER) $(CFLAGS) -o $@ -c $<
 
 $(BIN_DIR)/$(NAME): $(OBJ_LINUX)

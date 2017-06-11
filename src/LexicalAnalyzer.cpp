@@ -14,7 +14,7 @@ std::regex regex_reg8("(AL|CL|DL|BL|AH|CH|DH|BH)");
 std::regex regex_reg32("(EAX|ECX|EDX|EBX|ESP|EBP|ESI|EDI)");
 std::regex regex_command("(CLC|DEC|ADD|IDIV|CMP|AND|MOV|XOR|JAE)");
 std::regex regex_operator("(PTR)");
-std::regex regex_type("(BYTE|WORD|DWORD)");
+std::regex regex_type("(BYTE|WORD|DWORD|NEAR|FAR)");
 std::regex regex_segment("(CS|DS|SS|ES|FS|GS)");
 std::regex regex_directive("(END|SEGMENT|ENDS|EQU|DB|DW|DD)");
 std::regex regex_singlechar("([,:()\\[\\]\\*+-]{1})");

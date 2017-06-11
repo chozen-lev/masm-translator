@@ -11,7 +11,7 @@ private:
 
     // tables
     std::vector<Label*> m_Labels;
-    std::vector<Segment*> m_Segments;
+    std::vector<Label*> m_Segments;
     
 public:
     SyntaxAnalyzer() {};

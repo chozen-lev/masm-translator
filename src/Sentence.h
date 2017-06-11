@@ -9,6 +9,7 @@ class Sentence
     friend class Operand;
     friend class LexicalAnalyzer;
     friend class SyntaxAnalyzer;
+    friend class GrammarAnalyzer;
 
 private:
     std::string m_OriginalCode;
