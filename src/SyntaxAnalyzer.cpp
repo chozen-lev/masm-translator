@@ -1,5 +1,6 @@
 #include "SyntaxAnalyzer.h"
-#include <iostream>
+#include "Sentence.h"
+#include "Operand.h"
 
 void SyntaxAnalyzer::analyzeStruct(Sentence *sentence)
 {
@@ -11,10 +12,15 @@ void SyntaxAnalyzer::analyzeStruct(Sentence *sentence)
 
     if ((*token)->type == TokenType::IDENTIFIER && token + 1 != sentence->m_Tokens.end())
     {
-        if((*(token + 1))->name == ":" || (*(token + 1))->type == TokenType::DIRECTIVE)
+        if((*(token + 1))->type == TokenType::DIRECTIVE)
         {
             sentence->m_Label = new Label(*token);
             token++;
+        }
+        else if((*(token + 1))->name == ":")
+        {
+            sentence->m_Label = new Label(*token);
+            token += 2;
         }
         else
         {
@@ -23,19 +29,18 @@ void SyntaxAnalyzer::analyzeStruct(Sentence *sentence)
         }
     }
 
-    if ((*token)->type == TokenType::COMMAND || (*token)->type == TokenType::DIRECTIVE)
+    if (token != sentence->m_Tokens.end() && ((*token)->type == TokenType::COMMAND || (*token)->type == TokenType::DIRECTIVE))
     {
         sentence->m_Mnem = *token;
         token++;
 
-
         while (token != sentence->m_Tokens.end())
         {
-            sentence->m_Operands.push_back(new Operand((*token)->number));
+            sentence->m_Operands.push_back(new Operand(token));
 
             do
             {
-                sentence->m_Operands.back()->m_LexNum++;
+                sentence->m_Operands.back()->m_TokensNum++;
                 token++;
 
                 if (token != sentence->m_Tokens.end() && (*token)->name == ",")

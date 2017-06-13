@@ -5,7 +5,7 @@
 #include "LexicalAnalyzer.h"
 #include "SyntaxAnalyzer.h"
 #include "GrammarAnalyzer.h"
-#include "types.h"
+#include "GenerateListing.h"
 
 #define VERSION "17.6.11"
 
@@ -77,6 +77,7 @@ int main(int argc, char* argv[])
         LexicalAnalyzer LexAnalyzer;
         SyntaxAnalyzer SynAnalyzer;
         GrammarAnalyzer GramAnalyzer;
+        GenerateListing GenerListing;
 
         // sentences with all attributes
         std::vector<Sentence*> sentences;
@@ -85,7 +86,7 @@ int main(int argc, char* argv[])
         std::vector<Label*> labels;
         std::vector<Label*> segments;
 
-        Label *activeSeg = nullptr;// maybe stack of segments ?
+        std::stack<Label*> activeSegs;
 
         while (getline(FileSource, line))
         {
@@ -95,16 +96,38 @@ int main(int argc, char* argv[])
 
             LexAnalyzer.analyzeLine(sentences.back());
             SynAnalyzer.analyzeStruct(sentences.back());
-            GramAnalyzer.analyzeStruct(sentences.back(), activeSeg, labels, segments);
+            GramAnalyzer.analyzeStruct(sentences.back(), activeSegs, labels, segments);
 
             if (!sentences.back()->getError().empty()) {
-                std::cout << sentences.back()->getError() << std::endl;
+                std::cout << path_source << "(" << std::to_string(sentences.back()->getLineNum()) << "): " << sentences.back()->getError() << std::endl;
+            }
+            else if (!sentences.back()->getWarning().empty()) {
+                std::cout << path_source << "(" << std::to_string(sentences.back()->getLineNum()) << "): " << sentences.back()->getWarning() << std::endl;
             }
 
             if (!sentences.back()->getTokens().empty() && sentences.back()->getTokens().front()->name.compare("END") == 0) {
                 break;
             }
+
+            // if (!activeSegs.empty())
+            // {
+            //     *activeSegs.top()->value += sentences.back()->getBytesNum();
+            // }
         }
+
+        // std::vector<Sentence*>::iterator sentence = sentences.begin();
+
+        // while (sentence != sentences.end())
+        // {
+        //     GenerListing.printLine(FileListing, *sentence);
+        //     sentence++;
+        // }
+
+        // FileListing << std::endl << std::endl << std::endl;
+
+        // GenerListing.printSegments(FileListing, &segments);
+        // FileListing << std::endl << std::endl;
+        // GenerListing.printLabels(FileListing, &labels);
 
         FileSource.close();
         FileListing.close();

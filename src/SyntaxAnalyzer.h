@@ -1,18 +1,9 @@
 #pragma once
 
-#include "types.h"
-#include "Sentence.h"
-#include <vector>
+class Sentence;
 
 class SyntaxAnalyzer
 {
-private:
-    std::vector<Sentence> m_Sentences;
-
-    // tables
-    std::vector<Label*> m_Labels;
-    std::vector<Label*> m_Segments;
-    
 public:
     SyntaxAnalyzer() {};
     ~SyntaxAnalyzer() {};

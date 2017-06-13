@@ -1,8 +1,6 @@
-#include <regex>
-#include <iostream>
-
-#include "Sentence.h"
 #include "LexicalAnalyzer.h"
+
+#include <regex>
 
 std::regex regex_lexems("(\"[^\"]*\"|'[^']*'|[\\w]+|\\d+|[,:\\(\\)\\[\\]\\*+-;])");
 
@@ -93,7 +91,9 @@ void LexicalAnalyzer::analyzeLine(Sentence *sentence)
         } else if (std::regex_match(token->name.c_str(), regex_idendifier)) {
             token->type = TokenType::IDENTIFIER;
         } else {
+            sentence->m_Error = "Lexical error on line " + std::to_string(sentence->m_lineNum);
             token->type = TokenType::WRONG_LEXEM;
+            return;
         }
 
         token->number = ++number;

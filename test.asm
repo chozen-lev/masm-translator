@@ -5,7 +5,6 @@ Data segment
     String1 db "тестовий рядок - test string"
     Word1 dw 0cfh*1110b-29d
     Dword1 dd 6fb24e9fh
-    addr1 dd l8
 Data ends
 
 equ1 equ 01010101b
@@ -70,9 +69,8 @@ l4:
     and Word1[eax+ebx+6], 112233h
 l5:
     jae Begin
-    jae l4
+    jae kek
     jae l6
-
 l6: mov al, 'a'
     mov ah, 1
     mov bl, 0fh
