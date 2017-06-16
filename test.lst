@@ -1,0 +1,131 @@
+0000							Data1 segment
+0000  C8                      	    Byte1 db 200 
+0001  D1 82 D0 B5 D1 81 D1 82	    String1 db "тестовий рядок - test string"
+      D0 BE D0 B2 D0 B8 D0 B9
+      20 D1 80 D1 8F D0 B4 D0
+      BE D0 BA 20 2D 20 74 65
+      73 74 20 73 74 72 69 6E
+      67
+002A  0B35                    	    Word1 dw 0cfh*1110b-29d
+002C  6FB24E9F                	    Dword1 dd 6fb24e9fh
+0030							Data1 ends
+
+ = 0055							equ11 equ equ1
+ = 0055							equ1 equ 01010101b
+ = TEXT							equ2 equ "123456"
+ = 0019							equ3 equ 25
+ = 028E							equ4 equ 654d
+ = 0214							equ5 equ 214h
+ = 000A8C4B						equ6 equ 0a8c4bh
+
+0000							Code segment
+0000								Begin:
+0000          F8              	    clc
+
+0001          0F 00   00000000	    jae l1
+0007          0F 00   00000000	    jae l6
+
+000D  2E:     FE 0C18         	    dec byte ptr cs:[eax+ebx]
+0011      66| FF 4C11 02      	    dec word ptr ds:[ecx+edx+2]
+0016  26: 66| FF 4C11 04      	    dec word ptr es:[ecx+edx+4]
+001C  2E: 66| FF 4C11 06      	    dec word ptr cs:[ecx+edx+6]
+0022          FF 4C11 08      	    dec dword ptr ds:[ecx+edx+8]
+0026  26:     FF 8C11 12345678	    dec dword ptr es:[ecx+edx+12345678h]
+002E          FE 8C00 0000002A	    dec byte ptr Word1[eax+eax]
+0035          FF 8C3E 0000002E	    dec Dword1[esi+edi+2]
+003C								l1:
+003C          02 C3           	    add al, bl
+003E          02 CA           	    add cl, dl
+0040          03 C0           	    add eax, eax
+0042          03 F7           	    add esi, edi
+
+0044          0F 00   00000000	    jae near ptr l2
+004A          0F 00   00000000	    jae near ptr l3
+
+0050          F6 F8           	l2: idiv al
+0052          F6 FF           	    idiv bh
+0054          F7 F8           	    idiv eax
+0056          F7 FA           	    idiv edx
+0058          F7 FE           	    idiv esi
+005A								l3:
+005A  2E:     3A 3C0E         	    cmp bh, byte ptr cs:[esi+ecx]
+005E  26:     3A 0C30         	    cmp cl, byte ptr es:[eax+esi]
+0062          3A 543F 02      	    cmp dl, byte ptr ds:[edi+edi+2]
+0066  2E:     3B 4418 04      	    cmp eax, dword ptr cs:[eax+ebx+4]
+006B  2E:     3B 5C13 04      	    cmp ebx, dword ptr cs:[ebx+edx+4]
+0070          3B 743B 06      	    cmp esi, dword ptr ds:[ebx+edi+6]
+0074  26:     3B 743B 06      	    cmp esi, dword ptr es:[ebx+edi+6]
+0079          3A 8403 00000000	    cmp al, Byte1[ebx+eax]
+0080          3A B432 00000008	    cmp dh, Byte1[edx+esi+8]
+0087								l4:
+0087          80 0000 2F      	    and byte ptr cs:[esi+ecx], 101111b
+008B          80 0000 19      	    and byte ptr cs:[eax+ebx], 25
+008F          80 0000 30      	    and byte ptr es:[eax+ebx], 48d
+0093          80 0000 2F      	    and byte ptr cs:[ebx+ecx], 101111b
+0097          80 0000         	    and byte ptr es:[ebx+ecx], equ1
+009A      66| 81 0000 000074A2	    and word ptr ds:[eax+ebx], 74a2h
+00A2      66| 81 0000 00002544	    and word ptr cs:[edx+ebx+2], 2544h
+00AA          81 0000         	    and dword ptr ds:[eax+edx+4], equ5
+00AD          80 0000 0005A7D5	    and String1[esi+esi], 5a7d4h
+00B4          80 0000 00000001	    and String1[edi+eax], equ2
+00BB      66| 81 0000 0011225D	    and Word1[eax+ebx+6], 112233h
+00C3								l5:
+00C3          0F      00      	    jae Begin
+00C5          0F      00      	    jae l4
+00C7          0F 00   00000000	    jae l6
+
+00CD          B0      61      	l6: mov al, 'a'
+00CF          B4      01      	    mov ah, 1
+00D1          B3      0F      	    mov bl, 0fh
+00D3          B8              	    mov eax, equ6
+00D4          B9      00000073	    mov ecx, "string"
+00D9          BF      00000001	    mov edi, 1d
+00DE          BF      000000FF	    mov edi, 0FFFFFh
+
+00E3          0F 00   00000000	    jae l7
+00E9          0F 00   00000000	    jae l8
+00EF								l7:
+00EF  2E:     30 1C03         	    xor byte ptr cs:[ebx+eax], bl
+00F3          31 5C32 02      	    xor dword ptr ds:[edx+esi+2], ebx
+00F7          30 9439 00000000	    xor Byte1[ecx+edi], dl
+00FE          31 8C31 00000030	    xor Dword1[ecx+esi+4], ecx
+0105								l8:
+0105							Code ends
+								end Begin
+
+
+
+                N a m e         	Size	Length
+
+DATA1  . . . . . . . . . . . . . 	32 Bit	0030
+CODE . . . . . . . . . . . . . . 	32 Bit	0105
+
+
+                N a m e         	Type	Value	Attr
+
+BYTE1  . . . . . . . . . . . . . 	L BYTE	0000	DATA1
+STRING1  . . . . . . . . . . . . 	L BYTE	0001	DATA1
+
+WORD1  . . . . . . . . . . . . . 	L WORD	002A	DATA1
+
+DWORD1 . . . . . . . . . . . . . 	L DWORD	002C	DATA1
+
+EQU11  . . . . . . . . . . . . . 	NUMBER	0055
+EQU1 . . . . . . . . . . . . . . 	NUMBER	0055
+
+EQU2 . . . . . . . . . . . . . . 	TEXT	34333231
+
+EQU3 . . . . . . . . . . . . . . 	NUMBER	0019
+EQU4 . . . . . . . . . . . . . . 	NUMBER	028E
+EQU5 . . . . . . . . . . . . . . 	NUMBER	0214
+EQU6 . . . . . . . . . . . . . . 	NUMBER	A8C4B
+
+BEGIN  . . . . . . . . . . . . . 	L NEAR	0000	CODE
+L1 . . . . . . . . . . . . . . . 	L NEAR	003C	CODE
+L2 . . . . . . . . . . . . . . . 	L NEAR	0050	CODE
+L3 . . . . . . . . . . . . . . . 	L NEAR	005A	CODE
+L4 . . . . . . . . . . . . . . . 	L NEAR	0087	CODE
+L5 . . . . . . . . . . . . . . . 	L NEAR	00C3	CODE
+L6 . . . . . . . . . . . . . . . 	L NEAR	00CD	CODE
+L7 . . . . . . . . . . . . . . . 	L NEAR	00EF	CODE
+L8 . . . . . . . . . . . . . . . 	L NEAR	0105	CODE

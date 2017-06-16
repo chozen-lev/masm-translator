@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <map>
+#include <cstring>
 #include "Sentence.h"
 
 Operand::Operand(std::vector<Token*>::iterator first)
@@ -39,7 +40,7 @@ void Operand::analyzeAttributes(Sentence *sentence)
     // string
     if ((*token)->type == TokenType::CONST_TEXT)
     {
-        if (m_TokensNum > 1) {
+        if (token + 1 != end) {
             sentence->m_Warning = "warning: Extra characters on line";
         }
 
@@ -203,7 +204,7 @@ bool Operand::OpConst::evaluateExpr()
     if ((*first)->type == TokenType::CONST_TEXT)
     {
         bytesNum = (*first)->name.size();
-        bytes = new byte[bytesNum];
+        bytes = new byte[bytesNum]();
         std::copy((*first)->name.begin(), (*first)->name.end(), bytes);
     }
     else
@@ -230,16 +231,13 @@ bool Operand::OpConst::evaluateExpr()
             else return false;  // more than 32 bits
         }
 
-        bytes = new byte[bytesNum];
+        bytes = new byte[bytesNum]();
 
         if ((*first)->name == "-") {
             value = -value;
         }
 
-        // memcpy() ?
-        for (int i = 0; i < bytesNum; i++) {
-            bytes[bytesNum - i - 1] = (value >> (i * 8));
-        }
+        memcpy(bytes, &value, bytesNum);
     }
 
     return true;

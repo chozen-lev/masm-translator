@@ -1,20 +1,17 @@
-;.386
-
-Data segment
+Data1 segment
     Byte1 db 200 
     String1 db "тестовий рядок - test string"
     Word1 dw 0cfh*1110b-29d
     Dword1 dd 6fb24e9fh
-Data ends
+Data1 ends
 
+equ11 equ equ1
 equ1 equ 01010101b
-equ2 equ "1234"
+equ2 equ "123456"
 equ3 equ 25
 equ4 equ 654d
 equ5 equ 214h
 equ6 equ 0a8c4bh
-
-;assume cs:Code, ds:Data
 
 Code segment
 Begin:
@@ -28,8 +25,8 @@ Begin:
     dec word ptr es:[ecx+edx+4]
     dec word ptr cs:[ecx+edx+6]
     dec dword ptr ds:[ecx+edx+8]
-    dec dword ptr es:[ecx+edx+10]
-    dec Word1[eax+eax]
+    dec dword ptr es:[ecx+edx+12345678h]
+    dec byte ptr Word1[eax+eax]
     dec Dword1[esi+edi+2]
 l1:
     add al, bl
@@ -69,8 +66,9 @@ l4:
     and Word1[eax+ebx+6], 112233h
 l5:
     jae Begin
-    jae kek
+    jae l4
     jae l6
+
 l6: mov al, 'a'
     mov ah, 1
     mov bl, 0fh
@@ -82,7 +80,7 @@ l6: mov al, 'a'
     jae l7
     jae l8
 l7:
-    xor byte ptr ds:[ebx+eax], bl
+    xor byte ptr cs:[ebx+eax], bl
     xor dword ptr ds:[edx+esi+2], ebx
     xor Byte1[ecx+edi], dl
     xor Dword1[ecx+esi+4], ecx

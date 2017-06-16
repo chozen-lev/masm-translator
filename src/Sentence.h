@@ -66,9 +66,9 @@ friend class Operand;
 friend class LexicalAnalyzer;
 friend class SyntaxAnalyzer;
 friend class GrammarAnalyzer;
+friend class GenerateListing;
 
 private:
-    std::string m_OriginalCode;
     std::string m_Line;
     std::vector<Token*> m_Tokens;
 
@@ -83,10 +83,11 @@ private:
     byte* m_byteCmd;    // 1 byte
     byte* m_byteModRm;  // 1 byte
     byte* m_byteSib;    // 1 byte
-    byte* m_byteDisp;   // 1,2 or 4 bytes
+    byte* m_byteDisp;   // 1 or 4 bytes
+    byte* m_byteImm;    // 1,2 or 4 bytes
 
     int m_BytesNum;
-    int m_DispBytesNum;
+    int m_DispBytesNum; // there isn't another way to determinate allocated mem=(
 
     std::string m_Warning;
     std::string m_Error;
@@ -94,9 +95,11 @@ private:
 public:
     Sentence(int, std::string);
     ~Sentence() {};
+    std::string m_OriginalCode;
 
     std::string getError() const;
     std::string getWarning() const;
     std::vector<Token*> getTokens() const { return m_Tokens; }
     int getLineNum() const { return m_lineNum; }
+    int getBytesNum() const;
 };

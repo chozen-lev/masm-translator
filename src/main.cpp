@@ -98,36 +98,33 @@ int main(int argc, char* argv[])
             SynAnalyzer.analyzeStruct(sentences.back());
             GramAnalyzer.analyzeStruct(sentences.back(), activeSegs, labels, segments);
 
-            if (!sentences.back()->getError().empty()) {
-                std::cout << path_source << "(" << std::to_string(sentences.back()->getLineNum()) << "): " << sentences.back()->getError() << std::endl;
-            }
-            else if (!sentences.back()->getWarning().empty()) {
-                std::cout << path_source << "(" << std::to_string(sentences.back()->getLineNum()) << "): " << sentences.back()->getWarning() << std::endl;
-            }
-
             if (!sentences.back()->getTokens().empty() && sentences.back()->getTokens().front()->name.compare("END") == 0) {
                 break;
             }
-
-            // if (!activeSegs.empty())
-            // {
-            //     *activeSegs.top()->value += sentences.back()->getBytesNum();
-            // }
         }
 
-        // std::vector<Sentence*>::iterator sentence = sentences.begin();
+        /*
+            если остались открытые сегменты, вывести сообщение
+        */
+        while(!activeSegs.empty()) {
+            activeSegs.pop();
+        }
 
-        // while (sentence != sentences.end())
-        // {
-        //     GenerListing.printLine(FileListing, *sentence);
-        //     sentence++;
-        // }
+        std::vector<Sentence*>::iterator sentence = sentences.begin();
 
-        // FileListing << std::endl << std::endl << std::endl;
+        while (sentence != sentences.end())
+        {
+            GramAnalyzer.analyzeOffsets(*sentence, activeSegs, labels, segments);
+            GenerListing.printLine(FileListing, *sentence, activeSegs, path_source);
 
-        // GenerListing.printSegments(FileListing, &segments);
-        // FileListing << std::endl << std::endl;
-        // GenerListing.printLabels(FileListing, &labels);
+            sentence++;
+        }
+
+        FileListing << std::endl << std::endl << std::endl;
+
+        GenerListing.printSegments(FileListing, segments);
+        FileListing << std::endl << std::endl;
+        GenerListing.printLabels(FileListing, labels);
 
         FileSource.close();
         FileListing.close();
