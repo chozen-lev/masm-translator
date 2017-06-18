@@ -19,6 +19,8 @@ Sentence::Sentence(int number, std::string line)
 
     m_BytesNum = 0;
     m_DispBytesNum = 0;
+
+    *((int*)m_Offset) = 0;
 }
 
 std::string Sentence::getError() const {
@@ -26,7 +28,7 @@ std::string Sentence::getError() const {
 }
 
 std::string Sentence::getWarning() const {
-    return m_Error;
+    return m_Warning;
 }
 
 int Sentence::getBytesNum() const
@@ -55,6 +57,10 @@ int Sentence::getBytesNum() const
 
     if (m_byteDisp != nullptr) {
         bytesNum += m_DispBytesNum;
+    }
+
+    if (m_byteImm != nullptr) {
+        bytesNum += m_ImmBytesNum;
     }
 
     return bytesNum;

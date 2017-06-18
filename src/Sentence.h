@@ -53,9 +53,10 @@ struct Label
     byte *value;
     int bytesNum;
     Label *segment;
+    bool text;
 
-    Label(Token *_token): token(_token), type(LabelType::NONE), value(nullptr), bytesNum(0), segment(nullptr) {}
-    Label(): token(nullptr), type(LabelType::NONE), value(nullptr), bytesNum(0), segment(nullptr) {}
+    Label(Token *_token): token(_token), type(LabelType::NONE), value(nullptr), bytesNum(0), segment(nullptr), text(false) {}
+    Label(): token(nullptr), type(LabelType::NONE), value(nullptr), bytesNum(0), segment(nullptr), text(false) {}
 };
 
 class Operand;
@@ -74,6 +75,8 @@ private:
 
     int m_lineNum;
 
+    byte m_Offset[4];
+
     Label *m_Label;
     Token *m_Mnem;
     std::vector<Operand*> m_Operands;
@@ -88,6 +91,7 @@ private:
 
     int m_BytesNum;
     int m_DispBytesNum; // there isn't another way to determinate allocated mem=(
+    int m_ImmBytesNum;
 
     std::string m_Warning;
     std::string m_Error;

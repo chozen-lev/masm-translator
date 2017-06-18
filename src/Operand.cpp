@@ -195,11 +195,11 @@ void Operand::analyzeAttributes(Sentence *sentence)
     }
 }
 
-Operand::OpConst::OpConst(std::vector<Token*>::iterator _first, int _number): first(_first), tokensNum(_number), bytes(nullptr), bytesNum(0) {
+OpConst::OpConst(std::vector<Token*>::iterator _first, int _number): first(_first), tokensNum(_number), bytes(nullptr), bytesNum(0) {
     evaluateExpr();
 }
 
-bool Operand::OpConst::evaluateExpr()
+bool OpConst::evaluateExpr()
 {
     if ((*first)->type == TokenType::CONST_TEXT)
     {
@@ -243,7 +243,7 @@ bool Operand::OpConst::evaluateExpr()
     return true;
 }
 
-int Operand::OpConst::evaluateOp(std::stack<std::string> &ops, std::stack<int> &vals, bool &error)
+int OpConst::evaluateOp(std::stack<std::string> &ops, std::stack<int> &vals, bool &error)
 {
     int v = vals.top(); vals.pop();
 
@@ -295,7 +295,7 @@ int Operand::OpConst::evaluateOp(std::stack<std::string> &ops, std::stack<int> &
     return v;
 }
 
-int Operand::OpConst::evaluate(std::vector<Token*>::iterator begin, std::vector<Token*>::iterator end, bool &error)
+int OpConst::evaluate(std::vector<Token*>::iterator begin, std::vector<Token*>::iterator end, bool &error)
 {
     static const std::map <std::string, int>OpPriority = {{ "(", 0 }, { "+", 1 }, { "-", 1 }, { "*", 2 }, { "/", 2 }};
 

@@ -5,9 +5,14 @@ Data1 segment
     Dword1 dd 6fb24e9fh
 Data1 ends
 
+Data12 segment
+
 equ11 equ equ1
 equ1 equ 01010101b
-equ2 equ "123456"
+equ21 equ "14"
+equ23 equ "1"
+equ2 equ "1234"
+equ22 equ "1234567"
 equ3 equ 25
 equ4 equ 654d
 equ5 equ 214h
@@ -43,7 +48,7 @@ l2: idiv al
     idiv edx
     idiv esi
 l3:
-    cmp bh, byte ptr cs:[esi+ecx]
+    cmp bh, word ptr cs:[esi+ecx]
     cmp cl, byte ptr es:[eax+esi]
     cmp dl, byte ptr ds:[edi+edi+2]
     cmp eax, dword ptr cs:[eax+ebx+4]
@@ -59,11 +64,11 @@ l4:
     and byte ptr cs:[ebx+ecx], 101111b
     and byte ptr es:[ebx+ecx], equ1
     and word ptr ds:[eax+ebx], 74a2h
-    and word ptr cs:[edx+ebx+2], 2544h
-    and dword ptr ds:[eax+edx+4], equ5
-    and String1[esi+esi], 5a7d4h
-    and String1[edi+eax], equ2
-    and Word1[eax+ebx+6], 112233h
+    and word ptr cs:[edx+ebx+2], 24h
+    and dword ptr ds:[eax+edx+4], 1
+    and String1[esi+esi], 54h
+    and String1[edi+eax], equ1
+    and Word1[eax+ebx+6], 133h
 l5:
     jae Begin
     jae l4
@@ -73,7 +78,7 @@ l6: mov al, 'a'
     mov ah, 1
     mov bl, 0fh
     mov eax, equ6
-    mov ecx, "string"
+    mov ecx, "stig"
     mov edi, 1d
     mov edi, 0FFFFFh
 
@@ -86,4 +91,3 @@ l7:
     xor Dword1[ecx+esi+4], ecx
 l8:
 Code ends
-end Begin

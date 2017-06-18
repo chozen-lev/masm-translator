@@ -22,4 +22,5 @@ public:
 
     void analyzeStruct(Sentence *, std::stack<Label*> &, std::vector<Label*> &, std::vector<Label*> &);
     void analyzeOffsets(Sentence *, std::stack<Label*> &, std::vector<Label*> &, std::vector<Label*> &);
+    void analyzeJAE(Sentence *, std::stack<Label*> &, std::vector<Label*> &, std::vector<Label*> &);
 };

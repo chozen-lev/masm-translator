@@ -4,28 +4,29 @@
 
 #include <stack>
 
+struct OpConst
+{
+    std::vector<Token*>::iterator first;
+    int tokensNum;
+
+    byte *bytes;
+    int bytesNum;
+
+    OpConst(): first(nullptr), tokensNum(0), bytes(nullptr), bytesNum(0) {};
+    OpConst(std::vector<Token*>::iterator, int);
+    bool evaluateExpr();
+
+    int evaluateOp(std::stack<std::string> &, std::stack<int> &, bool &);
+    int evaluate(std::vector<Token*>::iterator, std::vector<Token*>::iterator, bool &);
+};
+
 class Operand
 {
 // friend class Sentence;
 friend class SyntaxAnalyzer;
 friend class GrammarAnalyzer;
+friend class GenerateListing;
 public:
-    struct OpConst
-    {
-        std::vector<Token*>::iterator first;
-        int tokensNum;
-
-        byte *bytes;
-        int bytesNum;
-
-        OpConst(): first(nullptr), tokensNum(0), bytes(nullptr), bytesNum(0) {};
-        OpConst(std::vector<Token*>::iterator, int);
-        bool evaluateExpr();
-
-        int evaluateOp(std::stack<std::string> &, std::stack<int> &, bool &);
-        int evaluate(std::vector<Token*>::iterator, std::vector<Token*>::iterator, bool &);
-    };
-
     enum class OpSize
     {
         NONE,

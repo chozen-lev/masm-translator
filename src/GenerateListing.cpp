@@ -1,4 +1,5 @@
 #include "GenerateListing.h"
+#include "Operand.h"
 
 #include  <iomanip>
 
@@ -28,14 +29,29 @@ bool GenerateListing::printLine(std::ofstream &stream, Sentence *sentence, std::
         {
             stream << " = ";
 
-            if (sentence->m_Label->bytesNum == 2) {
-                stream << std::setfill('0') << std::setw(4) << std::hex << std::uppercase << ((sentence->m_Label->value[1] << 8) | sentence->m_Label->value[0]) << "\t\t\t\t\t\t\t";
+            if ((*sentence->m_Operands.front()->m_FirstToken)->type != TokenType::CONST_TEXT)
+            {
+                if (sentence->m_Label->bytesNum == 2) {
+                    stream << std::setfill('0') << std::setw(4) << std::hex << std::uppercase << ((sentence->m_Label->value[1] << 8) | sentence->m_Label->value[0]) << "\t\t\t\t\t\t\t";
+                }
+                else if (sentence->m_Label->bytesNum == 4) {
+                    stream << std::setfill('0') << std::setw(8) << std::hex << std::uppercase << ((sentence->m_Label->value[3] << 24) | (sentence->m_Label->value[2] << 16) | (sentence->m_Label->value[1] << 8) | sentence->m_Label->value[0]) << "\t\t\t\t\t\t";
+                }
+                else {
+                    stream << "TEXT" << "\t\t\t\t\t\t\t";
+                }
             }
-            else if (sentence->m_Label->bytesNum == 4) {
-                stream << std::setfill('0') << std::setw(8) << std::hex << std::uppercase << ((sentence->m_Label->value[3] << 24) | (sentence->m_Label->value[2] << 16) | (sentence->m_Label->value[1] << 8) | sentence->m_Label->value[0]) << "\t\t\t\t\t\t";
-            }
-            else {
-                stream << "TEXT" << "\t\t\t\t\t\t\t";
+            else
+            {
+                if (sentence->m_Label->bytesNum == 2) {
+                    stream << std::setfill('0') << std::setw(4) << std::hex << std::uppercase << ((sentence->m_Label->value[0] << 8) | sentence->m_Label->value[1]) << "\t\t\t\t\t\t\t";
+                }
+                else if (sentence->m_Label->bytesNum == 4) {
+                    stream << std::setfill('0') << std::setw(8) << std::hex << std::uppercase << ((sentence->m_Label->value[0] << 24) | (sentence->m_Label->value[1] << 16) | (sentence->m_Label->value[2] << 8) | sentence->m_Label->value[3]) << "\t\t\t\t\t\t";
+                }
+                else {
+                    stream << "TEXT" << "\t\t\t\t\t\t\t";
+                }
             }
             stream << sentence->m_OriginalCode << std::endl;
 
@@ -62,7 +78,7 @@ bool GenerateListing::printLine(std::ofstream &stream, Sentence *sentence, std::
         }
 
         if (!activeSegs.empty()) {
-            stream << std::setfill('0') << std::setw(4) << std::hex << std::uppercase << *((int*)activeSegs.top()->value) - sentence->getBytesNum() << " ";
+            stream << std::setfill('0') << std::setw(4) << std::hex << std::uppercase << *((int*)sentence->m_Offset) << " ";
         }
         else {
             stream << "     ";
@@ -162,11 +178,56 @@ bool GenerateListing::printLine(std::ofstream &stream, Sentence *sentence, std::
                 return true;
             }
         }
+        else if (sentence->m_byteImm != nullptr)
+        {
+            if (sentence->m_ImmBytesNum == 1)
+            {
+                stream << " " << std::setfill('0') << std::setw(2) << std::hex << std::uppercase << (int)sentence->m_byteImm[0] << "      ";
+
+                if (sentence->m_byteCmd == nullptr) {
+                    stream << "                ";
+                }
+            }
+            else if (sentence->m_ImmBytesNum == 2)
+            {
+                stream << " " << std::setfill('0') << std::setw(4) << std::hex << std::uppercase << *((short*)sentence->m_byteImm) << "    ";
+
+                if (sentence->m_byteCmd == nullptr) {
+                    stream << "                ";
+                }
+            }
+            else if (sentence->m_ImmBytesNum == 4)
+            {
+                stream << " " << std::setfill('0') << std::setw(8) << std::hex << std::uppercase << *((int*)sentence->m_byteImm);
+
+                if (sentence->m_byteCmd == nullptr) {
+                    stream << "                ";
+                }
+            }
+        }
         else {
             stream << "         ";
         }
 
         stream << "\t" << sentence->m_OriginalCode << std::endl;
+
+        if (sentence->m_byteDisp != nullptr && sentence->m_byteImm != nullptr && sentence->getError().empty())
+        {
+            stream << "                      ";
+            if (sentence->m_ImmBytesNum == 1)
+            {
+                stream << std::setfill('0') << std::setw(2) << std::hex << std::uppercase << (int)sentence->m_byteImm[0];
+            }
+            else if (sentence->m_ImmBytesNum == 2)
+            {
+                stream << std::setfill('0') << std::setw(4) << std::hex << std::uppercase << *((short*)sentence->m_byteImm);
+            }
+            else if (sentence->m_ImmBytesNum == 4)
+            {
+                stream << std::setfill('0') << std::setw(8) << std::hex << std::uppercase << *((int*)sentence->m_byteImm);
+            }
+            stream << std::endl;
+        }
 
         if (!sentence->getError().empty())
         {
@@ -181,7 +242,7 @@ bool GenerateListing::printLine(std::ofstream &stream, Sentence *sentence, std::
     }
     else if (sentence->m_Label != nullptr && !activeSegs.empty())
     {
-        stream << std::setfill('0') << std::setw(4) << std::hex << std::uppercase << *((int*)activeSegs.top()->value) << "\t\t\t\t\t\t\t\t";
+        stream << std::setfill('0') << std::setw(4) << std::hex << std::uppercase << *((int*)sentence->m_Offset) << "\t\t\t\t\t\t\t\t";
         stream << sentence->m_OriginalCode << std::endl;
         return true;
     }
@@ -289,7 +350,28 @@ bool GenerateListing::printLabels(std::ofstream &stream, std::vector<Label*> tab
             stream << "\t" << "L FAR";
         }
 
-        stream << "\t" << std::setfill('0') << std::setw(4) << std::hex << *((int*)(*label)->value);
+        if ((*label)->text != true) {
+            stream << "\t" << std::setfill('0') << std::setw(4) << std::hex << *((int*)(*label)->value);
+        }
+        else {
+            if ((*label)->bytesNum == 2 && *((short*)(*label)->value) < 255) {
+                stream << "\t" << std::setfill('0') << std::setw(4) << std::hex << (int)(*label)->value[0];
+            }
+            else if ((*label)->bytesNum == 2) {
+                stream << "\t" << std::setfill('0') << std::setw(4) << std::hex << (((*label)->value[0] << 8) | (*label)->value[1]);
+            }
+            else if ((*label)->bytesNum <= 4) {
+                stream << "\t" << std::setfill('0') << std::setw(4) << std::hex << (((*label)->value[0] << 24) | ((*label)->value[1] << 16) | ((*label)->value[2] << 8) | (*label)->value[3]);
+            }
+            else {
+                stream << "\t\"";
+                for (int i = 0; i < (*label)->bytesNum; i++)
+                {
+                    stream << (char)(*label)->value[i];
+                }
+                stream << "\"";
+            }
+        }
 
         if ((*label)->segment != nullptr) {
             stream << "\t" << (*label)->segment->token->name;            

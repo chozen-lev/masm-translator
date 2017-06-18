@@ -7,7 +7,7 @@
 #include "GrammarAnalyzer.h"
 #include "GenerateListing.h"
 
-#define VERSION "17.6.11"
+#define VERSION "17.6.18"
 
 int main(int argc, char* argv[])
 {
@@ -28,8 +28,8 @@ int main(int argc, char* argv[])
         }
     }
 
-    path_source = "test.asm";
-    path_listing = "test.lst";
+    // path_source = "test.asm";
+    // path_listing = "test.lst";
 
     std::cout << "Translator version " << VERSION << std::endl;
     // std::cout << "Powered by Lev Bazylskyi KV-51 2017" << std::endl;
@@ -87,6 +87,9 @@ int main(int argc, char* argv[])
         std::vector<Label*> segments;
 
         std::stack<Label*> activeSegs;
+        std::stack<Label*> openedSegs;
+
+        bool end = false;
 
         while (getline(FileSource, line))
         {
@@ -98,15 +101,16 @@ int main(int argc, char* argv[])
             SynAnalyzer.analyzeStruct(sentences.back());
             GramAnalyzer.analyzeStruct(sentences.back(), activeSegs, labels, segments);
 
-            if (!sentences.back()->getTokens().empty() && sentences.back()->getTokens().front()->name.compare("END") == 0) {
+            if (!sentences.back()->getTokens().empty() && sentences.back()->getTokens().front()->name.compare("END") == 0)
+            {
+                end = true;
                 break;
             }
         }
 
-        /*
-            если остались открытые сегменты, вывести сообщение
-        */
-        while(!activeSegs.empty()) {
+        while(!activeSegs.empty())
+        {
+            openedSegs.push(activeSegs.top());
             activeSegs.pop();
         }
 
@@ -115,16 +119,77 @@ int main(int argc, char* argv[])
         while (sentence != sentences.end())
         {
             GramAnalyzer.analyzeOffsets(*sentence, activeSegs, labels, segments);
-            GenerListing.printLine(FileListing, *sentence, activeSegs, path_source);
 
             sentence++;
         }
 
-        FileListing << std::endl << std::endl << std::endl;
+        while(!activeSegs.empty()) {
+            activeSegs.pop();
+        }
+
+        for (std::vector<Label*>::iterator seg = segments.begin(); seg != segments.end(); seg++)
+        {
+            *((int*)(*seg)->value) = 0;
+        }
+
+        sentence = sentences.begin();
+
+        int err_num = 0;
+        int warn_num = 0;
+
+        std::cout << std::endl;
+
+        while (sentence != sentences.end())
+        {
+            GramAnalyzer.analyzeJAE(*sentence, activeSegs, labels, segments);
+            GenerListing.printLine(FileListing, *sentence, activeSegs, path_source);
+
+            if (!(*sentence)->getError().empty())
+            {
+                std::cout << path_source << "(" << std::to_string((*sentence)->getLineNum()) << "): "  << (*sentence)->getError() << std::endl;
+                err_num++;
+            }
+            else if (!(*sentence)->getWarning().empty())
+            {
+                std::cout << path_source << "(" << std::to_string((*sentence)->getLineNum()) << "): "  << (*sentence)->getWarning() << std::endl;
+                warn_num++;
+            }
+
+            sentence++;
+        }
+
+        FileListing << std::endl;
+
+        if (!end)
+        {
+            FileListing << path_source << "(" << std::to_string(lineNum + 1) << "): warning: End of file, no END directive" << std::endl;
+            std::cout << path_source << "(" << std::to_string(lineNum + 1) << "): warning: End of file, no END directive" << std::endl;
+            warn_num++;
+        }
+
+        while(!openedSegs.empty())
+        {
+            FileListing << "Open segments: " << openedSegs.top()->token->name << std::endl;
+            std::cout << "Open segments: " << openedSegs.top()->token->name << std::endl;
+            err_num++;
+            openedSegs.pop();
+        }
+
+        FileListing << std::endl << std::endl;
 
         GenerListing.printSegments(FileListing, segments);
         FileListing << std::endl << std::endl;
         GenerListing.printLabels(FileListing, labels);
+
+        FileListing << std::endl << std::endl;
+
+        std::cout << std::endl;
+
+        std::cout << "      " << warn_num << " Warning Errors" << std::endl;
+        std::cout << "      " << err_num << " Severe  Errors";
+
+        FileListing << "      " << warn_num << " Warning Errors" << std::endl;
+        FileListing << "      " << err_num << " Severe  Errors";
 
         FileSource.close();
         FileListing.close();

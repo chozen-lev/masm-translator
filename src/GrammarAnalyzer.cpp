@@ -72,6 +72,11 @@ void GrammarAnalyzer::analyzeStruct(Sentence *sentence, std::stack<Label*> &acti
             sentence->m_Label->bytesNum = 4;
         }
 
+        if ((*sentence->m_Operands.front()->m_FirstToken)->type == TokenType::CONST_TEXT)
+        {
+            sentence->m_Label->text = true;
+        }
+
         sentence->m_Label->value = new byte[sentence->m_Label->bytesNum]();    // () set bytes to zero
         memcpy(sentence->m_Label->value, sentence->m_Operands.front()->m_Const->bytes, sentence->m_Operands.front()->m_Const->bytesNum);
 
@@ -106,6 +111,12 @@ void GrammarAnalyzer::analyzeStruct(Sentence *sentence, std::stack<Label*> &acti
             delete sentence->m_Label;
             sentence->m_Label = buff;
             activeSegs.push(sentence->m_Label);
+            return;
+        }
+
+        if (segments.size() >= 2)
+        {
+            sentence->m_Error = "error: Segments limit was reached";
             return;
         }
 
@@ -525,14 +536,36 @@ void GrammarAnalyzer::analyzeStruct(Sentence *sentence, std::stack<Label*> &acti
                 sentence->m_Error = "error: Operand must have size";
                 return;
             }
+
+            if (sentence->m_Operands[0]->m_SegPrefix != nullptr)
+            {
+                if (sentence->m_Operands[0]->m_AddrReg1->name == "EBP" || sentence->m_Operands[0]->m_AddrReg1->name == "ESP")
+                {
+                    if (sentence->m_Operands[0]->m_SegPrefix->name != "SS") {
+                        sentence->m_bytePrefix = new byte();
+                        sentence->m_bytePrefix[0] = m_SegPrefs.at(sentence->m_Operands[1]->m_SegPrefix->name);
+                    }
+                }
+                else if (sentence->m_Operands[0]->m_SegPrefix->name != "DS") {
+                    sentence->m_bytePrefix = new byte();
+                    sentence->m_bytePrefix[0] = m_SegPrefs.at(sentence->m_Operands[0]->m_SegPrefix->name);
+                }
+            }
             
             sentence->m_byteModRm = new byte();
             sentence->m_byteSib = new byte();
 
+            if (sentence->m_Operands[0]->m_Const != nullptr)
+            {
+                sentence->m_byteDisp = new byte[(sentence->m_DispBytesNum = sentence->m_Operands[0]->m_Const->bytesNum == 1 ? 1 : 4)]();
+                memcpy(sentence->m_byteDisp, sentence->m_Operands[0]->m_Const->bytes, sentence->m_Operands[0]->m_Const->bytesNum);
+            }
+
             if (sentence->m_Operands[1]->m_Const != nullptr)
             {
-                sentence->m_byteDisp = new byte[(sentence->m_DispBytesNum = sentence->m_Operands[1]->m_Const->bytesNum == 1 ? 1 : 4)]();
-                memcpy(sentence->m_byteDisp, sentence->m_Operands[1]->m_Const->bytes, sentence->m_Operands[1]->m_Const->bytesNum);
+                sentence->m_ImmBytesNum = sentence->m_Operands[1]->m_Const->bytesNum;
+                sentence->m_byteImm = new byte[sentence->m_DispBytesNum]();
+                memcpy(sentence->m_byteImm, sentence->m_Operands[1]->m_Const->bytes, sentence->m_ImmBytesNum);
             }
 
             return;
@@ -563,7 +596,7 @@ void GrammarAnalyzer::analyzeStruct(Sentence *sentence, std::stack<Label*> &acti
             if (sentence->m_Operands[1]->m_Const != nullptr)
             {
                 sentence->m_byteDisp = new byte[(sentence->m_DispBytesNum = (*sentence->m_Operands[0]->m_FirstToken)->type == TokenType::REG8 ? 1 : 4)]();
-                memcpy(sentence->m_byteDisp, sentence->m_Operands[1]->m_Const->bytes, (sizeof(sentence->m_byteDisp) > sentence->m_Operands[1]->m_Const->bytesNum ? 1 : sizeof(sentence->m_byteDisp)));
+                memcpy(sentence->m_byteDisp, sentence->m_Operands[1]->m_Const->bytes, sentence->m_Operands[1]->m_Const->bytesNum);
             }
 
             return;
@@ -616,7 +649,7 @@ void GrammarAnalyzer::analyzeStruct(Sentence *sentence, std::stack<Label*> &acti
         if (sentence->m_Mnem->name == "JAE")
         {
             sentence->m_byteCmd = new byte();
-            sentence->m_byteCmd[0] = 0x0f;
+            sentence->m_byteCmd[0] = 0x73;
 
             if (sentence->m_Operands.size() != 1)
             {
@@ -634,8 +667,7 @@ void GrammarAnalyzer::analyzeStruct(Sentence *sentence, std::stack<Label*> &acti
 
             if (findLabelByName(labels, sentence->m_Operands.front()->m_Label->token->name) == nullptr)
             {
-                sentence->m_DispBytesNum = 4;
-                sentence->m_byteModRm = new byte(); // second command byte
+                return;
             }
 
             sentence->m_byteDisp = new byte[sentence->m_DispBytesNum]();
@@ -706,6 +738,7 @@ void GrammarAnalyzer::analyzeOffsets(Sentence *sentence, std::stack<Label*> &act
             sentence->m_Operands.front()->m_Label = buff;
 
             sentence->m_Label->type = sentence->m_Operands.front()->m_Label->type;
+            sentence->m_Label->text = sentence->m_Operands.front()->m_Label->text;
             sentence->m_Label->bytesNum = sentence->m_Operands.front()->m_Label->bytesNum;
             sentence->m_Label->value = sentence->m_Operands.front()->m_Label->value;
         }
@@ -991,17 +1024,105 @@ void GrammarAnalyzer::analyzeOffsets(Sentence *sentence, std::stack<Label*> &act
                 *((int*)sentence->m_byteDisp) += *((int*)sentence->m_Operands.front()->m_Label->value);
             }
 
+            if (sentence->m_Operands[1]->m_Label != nullptr)
+            {
+                if ((buff = findLabelByName(labels, sentence->m_Operands[1]->m_Label->token->name)) == nullptr)
+                {
+                    sentence->m_Error = "error: Symbol not defined: " + sentence->m_Operands[1]->m_Label->token->name;
+                    return;
+                }
+
+                delete sentence->m_Operands[1]->m_Label;
+                // sentence->m_Operands[1]->m_Label = buff;
+                sentence->m_Operands[1]->m_Label = nullptr;
+                sentence->m_Operands[1]->m_Const = new OpConst;
+                sentence->m_Operands[1]->m_Const->bytes = buff->value;
+                if (buff->bytesNum == 2) {
+                    if (*((short*)buff->value) <= 0xFF) {
+                        sentence->m_Operands[1]->m_Const->bytesNum = 1;
+                    }
+                    else {
+                        sentence->m_Operands[1]->m_Const->bytesNum = 2;
+                    }
+                }
+                else sentence->m_Operands[1]->m_Const->bytesNum = buff->bytesNum;
+
+                // if (sentence->m_DispBytesNum <= 1)
+                // {
+                //     int val = 0;
+                //     val = (sentence->m_DispBytesNum == 1) ? sentence->m_byteDisp[0] : 0;
+                //     delete sentence->m_byteDisp;
+                //     sentence->m_byteDisp = new byte[4]();
+                //     sentence->m_byteDisp[0] = val;
+                //     sentence->m_DispBytesNum = 4;
+                // }
+
+                sentence->m_byteImm = buff->value;
+            }
+
+            if (sentence->m_Operands[1]->m_Const != nullptr && sentence->m_Operands[1]->m_Const->bytesNum > 4)
+            {
+                sentence->m_Error = "error: Value out of range";
+                return;
+            }
+
+            sentence->m_ImmBytesNum = 4;
+
             if (sentence->m_Operands.front()->m_SizePtr != nullptr)
             {
                 if (sentence->m_Operands.front()->m_SizePtr->name != "BYTE")
                 {
                     sentence->m_byteCmd[0] = 0x81;
                 }
+                else if (sentence->m_Operands[1]->m_Const != nullptr)
+                {
+                    if (sentence->m_Operands[1]->m_Const->bytesNum > 1)
+                    {
+                        sentence->m_Error = "error: Value out of range";
+                        return;
+                    }
+
+                    sentence->m_ImmBytesNum = 1;
+                }
 
                 if (sentence->m_Operands.front()->m_SizePtr->name == "WORD")
                 {
+                    if (sentence->m_Operands[1]->m_Const != nullptr && sentence->m_Operands[1]->m_Const->bytesNum > 2)
+                    {
+                        sentence->m_Error = "error: Value out of range";
+                        return;
+                    }
+
+                    if (sentence->m_Operands[1]->m_Const->bytesNum == 1)
+                    {
+                        sentence->m_byteCmd[0] = 0x83;
+                        sentence->m_ImmBytesNum = 1;
+                    }
+                    else {
+                        sentence->m_ImmBytesNum = 2;
+                    }
                     sentence->m_bytePtr = new byte();
                     sentence->m_bytePtr[0] = 0x66;
+                }
+                else if (sentence->m_Operands.front()->m_SizePtr->name == "DWORD")
+                {
+                    if (sentence->m_Operands[1]->m_Const != nullptr && sentence->m_Operands[1]->m_Const->bytesNum > 4)
+                    {
+                        sentence->m_Error = "error: Value out of range";
+                        return;
+                    }
+
+                    if (sentence->m_Operands[1]->m_Const->bytesNum == 1)
+                    {
+                        sentence->m_byteCmd[0] = 0x83;
+                        sentence->m_ImmBytesNum = 1;
+                    }
+                    else if (sentence->m_Operands[1]->m_Const->bytesNum == 2) {
+                        sentence->m_ImmBytesNum = 2;
+                    }
+                    else {
+                        sentence->m_ImmBytesNum = 4;
+                    }
                 }
             }
             else 
@@ -1009,12 +1130,94 @@ void GrammarAnalyzer::analyzeOffsets(Sentence *sentence, std::stack<Label*> &act
                 if (sentence->m_Operands.front()->m_Label->type != LabelType::LBYTE) {
                     sentence->m_byteCmd[0] = 0x81;
                 }
+                else if (sentence->m_Operands[1]->m_Const->bytesNum > 1)
+                {
+                    sentence->m_Error = "error: Value out of range";
+                    return;
+                }
+                else {
+                    sentence->m_ImmBytesNum = 1;
+                }
 
                 if (sentence->m_Operands.front()->m_Label->type == LabelType::LWORD)
                 {
+                    if (sentence->m_Operands[1]->m_Const->bytesNum > 2)
+                    {
+                        sentence->m_Error = "error: Value out of range";
+                        return;
+                    }
+
+                    if (sentence->m_Operands[1]->m_Const->bytesNum == 1)
+                    {
+                        sentence->m_byteCmd[0] = 0x83;
+                        sentence->m_ImmBytesNum = 1;
+                    }
+                    else {
+                        sentence->m_ImmBytesNum = 2;
+                    }
                     sentence->m_bytePtr = new byte();
                     sentence->m_bytePtr[0] = 0x66;
                 }
+                else if (sentence->m_Operands.front()->m_Label->type == LabelType::LDWORD)
+                {
+                    if (sentence->m_Operands[1]->m_Const != nullptr && sentence->m_Operands[1]->m_Const->bytesNum > 4)
+                    {
+                        sentence->m_Error = "error: Value out of range";
+                        return;
+                    }
+
+                    if (sentence->m_Operands[1]->m_Const->bytesNum == 1)
+                    {
+                        sentence->m_byteCmd[0] = 0x83;
+                        sentence->m_ImmBytesNum = 1;
+                    }
+                    else if (sentence->m_Operands[1]->m_Const->bytesNum == 2) {
+                        sentence->m_ImmBytesNum = 2;
+                    }
+                    else {
+                        sentence->m_ImmBytesNum = 4;
+                    }
+                }
+            }
+
+            // 100 - additional opcode, 100 - [][] addressing mode
+            sentence->m_byteModRm[0] = 0x24;
+
+            // disp bytes num
+            if (sentence->m_DispBytesNum == 1) {
+                sentence->m_byteModRm[0] += 0x40;
+            }
+            else if (sentence->m_DispBytesNum == 4) {
+                sentence->m_byteModRm[0] += 0x80;
+            }
+
+            sentence->m_byteSib[0] = (m_Reg32.at(sentence->m_Operands.front()->m_AddrReg2->name) << 3) + m_Reg32.at(sentence->m_Operands.front()->m_AddrReg1->name);
+        }
+        else if (sentence->m_Mnem->name == "MOV")
+        {
+            Label *buff;
+            if (sentence->m_Operands[1]->m_Label != nullptr)
+            {
+                if ((buff = findLabelByName(labels, sentence->m_Operands[1]->m_Label->token->name)) == nullptr)
+                {
+                    sentence->m_Error = "error: Symbol not defined: " + sentence->m_Operands[1]->m_Label->token->name;
+                    return;
+                }
+
+                delete sentence->m_Operands[1]->m_Label;
+                sentence->m_Operands[1]->m_Label = buff;
+
+                if (sentence->m_DispBytesNum <= 1)
+                {
+                    int val = 0;
+                    val = (sentence->m_DispBytesNum == 1) ? sentence->m_byteDisp[0] : 0;
+                    delete sentence->m_byteDisp;
+                    sentence->m_byteDisp = new byte[4]();
+                    sentence->m_byteDisp[0] = val;
+                    sentence->m_DispBytesNum = 4;
+                }
+
+                *((int*)sentence->m_byteDisp) += *((int*)sentence->m_Operands[1]->m_Label->value);
             }
         }
         else if (sentence->m_Mnem->name == "XOR")
@@ -1093,13 +1296,80 @@ void GrammarAnalyzer::analyzeOffsets(Sentence *sentence, std::stack<Label*> &act
 
             sentence->m_byteSib[0] = (m_Reg32.at(sentence->m_Operands.front()->m_AddrReg2->name) << 3) + m_Reg32.at(sentence->m_Operands.front()->m_AddrReg1->name);
         }
+        else if (sentence->m_Mnem->name == "JAE")
+        {
+            Label *buff;
+            if (sentence->m_Operands.front()->m_Label != nullptr)
+            {
+                if ((buff = findLabelByName(labels, sentence->m_Operands.front()->m_Label->token->name)) == nullptr)
+                {
+                    sentence->m_Error = "error: Symbol not defined: " + sentence->m_Operands.front()->m_Label->token->name;
+                    return;
+                }
+
+                delete sentence->m_Operands.front()->m_Label;
+                sentence->m_Operands.front()->m_Label = buff;
+
+
+                if (buff->segment != activeSegs.top())
+                {
+                    sentence->m_Error = "error: Wrong label segment: " + sentence->m_Operands.front()->m_Label->token->name;
+                    return;
+                }
+
+                if (sentence->m_byteDisp == nullptr || *((int*)sentence->m_Operands.front()->m_Label->value) - *((int*)activeSegs.top()->value) < -128 || *((int*)sentence->m_Operands.front()->m_Label->value) - *((int*)activeSegs.top()->value) > 127)
+                {
+                    sentence->m_byteCmd[0] = 0x0f;
+                    sentence->m_byteDisp = new byte[4]();
+                    sentence->m_DispBytesNum = 4;
+                    sentence->m_byteModRm = new byte[1]();
+                    sentence->m_byteModRm[0] = 0x83;
+                    // *((int*)sentence->m_byteDisp) = *((int*)sentence->m_Operands.front()->m_Label->value);
+                }
+            }
+        }
     }
 
     if (sentence->m_Label != nullptr && sentence->m_Tokens[sentence->m_Label->token->number]->name == ":") {
         memcpy(sentence->m_Label->value, activeSegs.top()->value, 4);
     }
 
-    if (!activeSegs.empty()) {
+    if (!activeSegs.empty())
+    {
+        *((int*)sentence->m_Offset) = *((int*)activeSegs.top()->value);
+        // std::cout << std::hex << *((int*)sentence->m_Offset) << std::endl;
+        *((int*)activeSegs.top()->value) += sentence->getBytesNum();
+    }
+}
+
+void GrammarAnalyzer::analyzeJAE(Sentence *sentence, std::stack<Label*> &activeSegs, std::vector<Label*> &labels, std::vector<Label*> &segments)
+{
+    if (sentence->m_Tokens.empty() || !sentence->m_Error.empty()) {
+        return;
+    }
+
+    if (sentence->m_Mnem != nullptr)
+    {
+        if (sentence->m_Mnem->name == "SEGMENT") {
+            activeSegs.push(sentence->m_Label);
+        }
+        else if (sentence->m_Mnem->name == "ENDS") {
+            activeSegs.pop();
+        }
+    }
+
+    if ( !sentence->m_Operands.empty() && sentence->m_Mnem->name == "JAE")
+    {
+        if (sentence->m_DispBytesNum == 4) {
+           *((int*)sentence->m_byteDisp) = *((int*)sentence->m_Operands.front()->m_Label->value);
+        }
+        else {
+            sentence->m_byteDisp[0] = 256 - (*((int*)sentence->m_Offset) - *((int*)sentence->m_Operands.front()->m_Label->value) + 2);
+        }
+    }
+
+    if (!activeSegs.empty())
+    {
         *((int*)activeSegs.top()->value) += sentence->getBytesNum();
     }
 }
