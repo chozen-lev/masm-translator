@@ -350,6 +350,12 @@ bool GenerateListing::printLabels(std::ofstream &stream, std::vector<Label*> tab
             stream << "\t" << "L FAR";
         }
 
+        if ((*label)->value == nullptr) {
+            stream << std::endl;
+            label++;
+            continue;
+        }
+
         if ((*label)->text != true) {
             stream << "\t" << std::setfill('0') << std::setw(4) << std::hex << *((int*)(*label)->value);
         }

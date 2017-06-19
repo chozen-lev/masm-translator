@@ -1,4 +1,4 @@
-0000							Data1 segment
+0000							Data segment
 0000  C8                      	    Byte1 db 200 
 0001  D1 82 D0 B5 D1 81 D1 82	    String1 db "тестовий рядок - test string"
       D0 BE D0 B2 D0 B8 D0 B9
@@ -8,28 +8,21 @@
       67
 002A  0B35                    	    Word1 dw 0cfh*1110b-29d
 002C  6FB24E9F                	    Dword1 dd 6fb24e9fh
-0030							Data1 ends
+0030							Data ends
 
-0000							Data12 segment
-
- = 0055							equ11 equ equ1
- = 0055							equ1 equ 01010101b
- = 3134							equ21 equ "14"
- = 3100							equ23 equ "1"
+ = 009D							equ1 equ equ3
  = 31323334						equ2 equ "1234"
- = TEXT							equ22 equ "1234567"
- = 0019							equ3 equ 25
+ = 009D							equ3 equ 10011101b
  = 028E							equ4 equ 654d
  = 0214							equ5 equ 214h
  = 000A8C4B						equ6 equ 0a8c4bh
 
-								Code segment
-test.asm(21): error: Segments limit was reached
+0000							Code segment
 0000								Begin:
 0000          F8              	    clc
 
 0001          0F 83   0000003C	    jae l1
-0007          0F 83   000000DA	    jae l6
+0007          0F 83   000000DE	    jae l6
 
 000D  2E:     FE 0C18         	    dec byte ptr cs:[eax+ebx]
 0011      66| FF 4C11 02      	    dec word ptr ds:[ecx+edx+2]
@@ -54,99 +47,91 @@ test.asm(21): error: Segments limit was reached
 0056          F7 FA           	    idiv edx
 0058          F7 FE           	    idiv esi
 005A								l3:
-005A  2E:     3A 3C0E         	    cmp bh, word ptr cs:[esi+ecx]
-test.asm(51): warning: Operand types must match
-005E  26:     3A 0C30         	    cmp cl, byte ptr es:[eax+esi]
-0062          3A 543F 02      	    cmp dl, byte ptr ds:[edi+edi+2]
-0066  2E:     3B 4418 04      	    cmp eax, dword ptr cs:[eax+ebx+4]
-006B  2E:     3B 5C13 04      	    cmp ebx, dword ptr cs:[ebx+edx+4]
-0070          3B 743B 06      	    cmp esi, dword ptr ds:[ebx+edi+6]
-0074  26:     3B 743B 06      	    cmp esi, dword ptr es:[ebx+edi+6]
-0079          3A 8403 00000000	    cmp al, Byte1[ebx+eax]
-0080          3A B432 00000008	    cmp dh, Byte1[edx+esi+8]
-0087								l4:
-0087  2E:     80 240E 2F      	    and byte ptr cs:[esi+ecx], 101111b
-008C  2E:     80 2418 19      	    and byte ptr cs:[eax+ebx], 25
-0091  26:     80 2418 30      	    and byte ptr es:[eax+ebx], 48d
-0096  2E:     80 240B 2F      	    and byte ptr cs:[ebx+ecx], 101111b
-009B  26:     80 240B 55      	    and byte ptr es:[ebx+ecx], equ1
-00A0      66| 81 2418 74A2    	    and word ptr ds:[eax+ebx], 74a2h
-00A6  2E: 66| 83 641A 02      	    and word ptr cs:[edx+ebx+2], 24h
+005A  2E:     3A 7C0D 00      	    cmp bh, byte ptr cs:[ebp+ecx]
+005F  26:     3A 0C30         	    cmp cl, byte ptr es:[eax+esi]
+0063          3A 543F 02      	    cmp dl, byte ptr ds:[edi+edi+2]
+0067  2E:     3B 4418 04      	    cmp eax, dword ptr cs:[eax+ebx+4]
+006C  2E:     3B 5C13 04      	    cmp ebx, dword ptr cs:[ebx+edx+4]
+0071          3B 743B 06      	    cmp esi, dword ptr ds:[ebx+edi+6]
+0075  26:     3B 743B 06      	    cmp esi, dword ptr es:[ebx+edi+6]
+007A          3A 8403 00000000	    cmp al, Byte1[ebx+eax]
+0081          3A B432 00000008	    cmp dh, Byte1[edx+esi+8]
+0088								l4:
+0088  2E:     80 240E 2F      	    and byte ptr cs:[esi+ecx], 101111b
+008D          80 641D 00      	    and byte ptr ss:[ebp+ebx], 25
+                      19
+0092  3E:     80 2425 30      	    and byte ptr ds:[ebp+esp], 48d
+0097  2E:     80 240B 2F      	    and byte ptr cs:[ebx+ecx], 101111b
+009C  26:     80 240B 9D      	    and byte ptr es:[ebx+ecx], equ3
+00A1      66| 81 2418 74A2    	    and word ptr ds:[eax+ebx], 74a2h
+00A7  2E: 66| 83 641A 02      	    and word ptr cs:[edx+ebx+2], 24h
                       24
-00AD          83 6410 04      	    and dword ptr ds:[eax+edx+4], 1
-                      01
-00B2          80 A436 00000001	    and String1[esi+esi], 54h
+00AE          81 6410 04      	    and dword ptr ds:[eax+edx+4], equ2
+                      34333231
+00B6          80 A436 00000001	    and String1[esi+esi], 54h
                       54
-00BA          80 A407 00000001	    and String1[edi+eax], equ1
-                      55
-00C2      66| 81 A418 00000030	    and Word1[eax+ebx+6], 133h
+00BE          80 A407 00000001	    and String1[edi+eax], 'b'
+                      62
+00C6      66| 81 A418 00000030	    and Word1[eax+ebx+6], 133h
                       0133
-00CC								l5:
-00CC          0F 83   00000000	    jae Begin
-00D2          73      B3      	    jae l4
-00D4          0F 83   000000DA	    jae l6
+00D0								l5:
+00D0          0F 83   00000000	    jae Begin
+00D6          73      B0      	    jae l4
+00D8          0F 83   000000DE	    jae l6
 
-00DA          B0      61      	l6: mov al, 'a'
-00DC          B4      01      	    mov ah, 1
-00DE          B3      0F      	    mov bl, 0fh
-00E0          B8      000A8C4B	    mov eax, equ6
-00E5          B9      67697473	    mov ecx, "stig"
-00EA          BF      00000001	    mov edi, 1d
-00EF          BF      000FFFFF	    mov edi, 0FFFFFh
+00DE          B0      61      	l6: mov al, 'a'
+00E0          B4      01      	    mov ah, 1
+00E2          B3      0F      	    mov bl, 0fh
+00E4          B8      34333231	    mov eax, equ2
+00E9          B9      6E727473	    mov ecx, "strn"
+00EE          BF      00000001	    mov edi, 1d
+00F3          BF      000FFFFF	    mov edi, 0FFFFFh
 
-00F4          0F 83   00000100	    jae l7
-00FA          0F 83   00000116	    jae l8
-0100								l7:
-0100  2E:     30 1C03         	    xor byte ptr cs:[ebx+eax], bl
-0104          31 5C32 02      	    xor dword ptr ds:[edx+esi+2], ebx
-0108          30 9439 00000000	    xor Byte1[ecx+edi], dl
-010F          31 8C31 00000030	    xor Dword1[ecx+esi+4], ecx
-0116								l8:
-								Code ends
-test.asm(93): error: Block nesting error
+00F8          0F 83   00000104	    jae l7
+00FE          0F 83   0000011A	    jae l8
+0104								l7:
+0104  2E:     30 1C03         	    xor byte ptr cs:[ebx+eax], bl
+0108          31 5C32 02      	    xor dword ptr ds:[edx+esi+2], ebx
+010C          30 9439 00000000	    xor Byte1[ecx+edi], dl
+0113          31 8C31 00000030	    xor Dword1[ecx+esi+4], ecx
+011A								l8:
+011A							Code ends
+								end
 
-test.asm(94): warning: End of file, no END directive
-Open segments: DATA12
 
 
                 N a m e         	Size	Length
 
-DATA1  . . . . . . . . . . . . . 	32 Bit	0030
-DATA12 . . . . . . . . . . . . . 	32 Bit	0116
+DATA . . . . . . . . . . . . . . 	32 Bit	0030
+CODE . . . . . . . . . . . . . . 	32 Bit	011A
 
 
                 N a m e         	Type	Value	Attr
 
-BYTE1  . . . . . . . . . . . . . 	L BYTE	0000	DATA1
-STRING1  . . . . . . . . . . . . 	L BYTE	0001	DATA1
+BYTE1  . . . . . . . . . . . . . 	L BYTE	0000	DATA
+STRING1  . . . . . . . . . . . . 	L BYTE	0001	DATA
 
-WORD1  . . . . . . . . . . . . . 	L WORD	002A	DATA1
+WORD1  . . . . . . . . . . . . . 	L WORD	002A	DATA
 
-DWORD1 . . . . . . . . . . . . . 	L DWORD	002C	DATA1
+DWORD1 . . . . . . . . . . . . . 	L DWORD	002C	DATA
 
-EQU11  . . . . . . . . . . . . . 	NUMBER	0055
-EQU1 . . . . . . . . . . . . . . 	NUMBER	0055
-EQU21  . . . . . . . . . . . . . 	NUMBER	3134
-EQU23  . . . . . . . . . . . . . 	NUMBER	0031
+EQU1 . . . . . . . . . . . . . . 	NUMBER	009D
 EQU2 . . . . . . . . . . . . . . 	NUMBER	31323334
-
-EQU22  . . . . . . . . . . . . . 	TEXT	"1234567"
-
-EQU3 . . . . . . . . . . . . . . 	NUMBER	0019
+EQU3 . . . . . . . . . . . . . . 	NUMBER	009D
 EQU4 . . . . . . . . . . . . . . 	NUMBER	028E
 EQU5 . . . . . . . . . . . . . . 	NUMBER	0214
 EQU6 . . . . . . . . . . . . . . 	NUMBER	A8C4B
 
-BEGIN  . . . . . . . . . . . . . 	L NEAR	0000	DATA12
-L1 . . . . . . . . . . . . . . . 	L NEAR	003C	DATA12
-L2 . . . . . . . . . . . . . . . 	L NEAR	0050	DATA12
-L3 . . . . . . . . . . . . . . . 	L NEAR	005A	DATA12
-L4 . . . . . . . . . . . . . . . 	L NEAR	0087	DATA12
-L5 . . . . . . . . . . . . . . . 	L NEAR	00CC	DATA12
-L6 . . . . . . . . . . . . . . . 	L NEAR	00DA	DATA12
-L7 . . . . . . . . . . . . . . . 	L NEAR	0100	DATA12
-L8 . . . . . . . . . . . . . . . 	L NEAR	0116	DATA12
+BEGIN  . . . . . . . . . . . . . 	L NEAR	0000	CODE
+L1 . . . . . . . . . . . . . . . 	L NEAR	003C	CODE
+L2 . . . . . . . . . . . . . . . 	L NEAR	0050	CODE
+L3 . . . . . . . . . . . . . . . 	L NEAR	005A	CODE
+L4 . . . . . . . . . . . . . . . 	L NEAR	0088	CODE
+L5 . . . . . . . . . . . . . . . 	L NEAR	00D0	CODE
+L6 . . . . . . . . . . . . . . . 	L NEAR	00DE	CODE
+L7 . . . . . . . . . . . . . . . 	L NEAR	0104	CODE
+L8 . . . . . . . . . . . . . . . 	L NEAR	011A	CODE
 
 
-      2 Warning Errors
-      3 Severe  Errors
+      0 Warning Errors
+      0 Severe  Errors

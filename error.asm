@@ -25,7 +25,7 @@ Begin:
     dec word ptr cs:[ecx+edx+6]
     dec dword ptr ds:[ecx+edx+8]
     dec dword ptr es:[ecx+edx+12345678h]
-    dec byte ptr Word1[eax+eax]
+    dec byte ptr Word2[eax+eax]
     dec Dword1[esi+edi+2]
 l1:
     add al, bl
@@ -33,7 +33,7 @@ l1:
     add eax, eax
     add esi, edi
 
-    jae near ptr l2
+    jae near ptr l22
     jae near ptr l3
 
 l2: idiv al
@@ -45,15 +45,15 @@ l3:
     cmp bh, byte ptr cs:[ebp+ecx]
     cmp cl, byte ptr es:[eax+esi]
     cmp dl, byte ptr ds:[edi+edi+2]
-    cmp eax, dword ptr cs:[eax+ebx+4]
+    cmp eax, byte ptr cs:[eax+ebx+4]
     cmp ebx, dword ptr cs:[ebx+edx+4]
     cmp esi, dword ptr ds:[ebx+edi+6]
     cmp esi, dword ptr es:[ebx+edi+6]
     cmp al, Byte1[ebx+eax]
     cmp dh, Byte1[edx+esi+8]
 l4:
-    and byte ptr cs:[esi+ecx], 101111b
-    and byte ptr ss:[ebp+ebx], 25
+    and  ptr cs:[esi+ecx], 101111b
+    and byte ss:[ebp+ebx], 25
     and byte ptr ds:[ebp+esp], 48d
     and byte ptr cs:[ebx+ecx], 101111b
     and byte ptr es:[ebx+ecx], equ3
@@ -64,7 +64,7 @@ l4:
     and String1[edi+eax], 'b'
     and Word1[eax+ebx+6], 133h
 l5:
-    jae Begin
+    jae Begin1
     jae l4
     jae l6
 

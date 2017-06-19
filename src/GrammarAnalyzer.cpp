@@ -369,6 +369,18 @@ void GrammarAnalyzer::analyzeStruct(Sentence *sentence, std::stack<Label*> &acti
             {
                 if (sentence->m_Operands.front()->m_AddrReg1->name == "EBP" || sentence->m_Operands.front()->m_AddrReg1->name == "ESP")
                 {
+                    if (sentence->m_Operands.front()->m_AddrReg1->name == "ESP" && sentence->m_Operands.front()->m_AddrReg2->name == "ESP")
+                    {
+                        sentence->m_Error = "error: Multiple base registers";
+                        return;
+                    }
+
+                    if (sentence->m_Operands.front()->m_AddrReg1->name == "EBP" && sentence->m_byteDisp == nullptr && sentence->m_Operands.front()->m_AddrReg2->name != "ESP")
+                    {
+                        sentence->m_byteDisp = new byte();
+                        sentence->m_DispBytesNum = 1;
+                    }
+
                     if (sentence->m_Operands.front()->m_SegPrefix->name != "SS") {
                         sentence->m_bytePrefix = new byte();
                         sentence->m_bytePrefix[0] = m_SegPrefs.at(sentence->m_Operands.front()->m_SegPrefix->name);
@@ -491,6 +503,18 @@ void GrammarAnalyzer::analyzeStruct(Sentence *sentence, std::stack<Label*> &acti
             {
                 if (sentence->m_Operands[1]->m_AddrReg1->name == "EBP" || sentence->m_Operands[1]->m_AddrReg1->name == "ESP")
                 {
+                    if (sentence->m_Operands[1]->m_AddrReg1->name == "ESP" && sentence->m_Operands[1]->m_AddrReg2->name == "ESP")
+                    {
+                        sentence->m_Error = "error: Multiple base registers";
+                        return;
+                    }
+
+                    if (sentence->m_Operands[1]->m_AddrReg1->name == "EBP" && sentence->m_byteDisp == nullptr && sentence->m_Operands[1]->m_AddrReg2->name != "ESP")
+                    {
+                        sentence->m_byteDisp = new byte();
+                        sentence->m_DispBytesNum = 1;
+                    }
+
                     if (sentence->m_Operands[1]->m_SegPrefix->name != "SS") {
                         sentence->m_bytePrefix = new byte();
                         sentence->m_bytePrefix[0] = m_SegPrefs.at(sentence->m_Operands[1]->m_SegPrefix->name);
@@ -541,9 +565,21 @@ void GrammarAnalyzer::analyzeStruct(Sentence *sentence, std::stack<Label*> &acti
             {
                 if (sentence->m_Operands[0]->m_AddrReg1->name == "EBP" || sentence->m_Operands[0]->m_AddrReg1->name == "ESP")
                 {
+                    if (sentence->m_Operands.front()->m_AddrReg1->name == "ESP" && sentence->m_Operands.front()->m_AddrReg2->name == "ESP")
+                    {
+                        sentence->m_Error = "error: Multiple base registers";
+                        return;
+                    }
+                    
+                    if (sentence->m_Operands[0]->m_AddrReg1->name == "EBP" && sentence->m_byteDisp == nullptr && sentence->m_Operands[0]->m_AddrReg2->name != "ESP")
+                    {
+                        sentence->m_byteDisp = new byte();
+                        sentence->m_DispBytesNum = 1;
+                    }
+
                     if (sentence->m_Operands[0]->m_SegPrefix->name != "SS") {
                         sentence->m_bytePrefix = new byte();
-                        sentence->m_bytePrefix[0] = m_SegPrefs.at(sentence->m_Operands[1]->m_SegPrefix->name);
+                        sentence->m_bytePrefix[0] = m_SegPrefs.at(sentence->m_Operands[0]->m_SegPrefix->name);
                     }
                 }
                 else if (sentence->m_Operands[0]->m_SegPrefix->name != "DS") {
@@ -623,6 +659,18 @@ void GrammarAnalyzer::analyzeStruct(Sentence *sentence, std::stack<Label*> &acti
             {
                 if (sentence->m_Operands.front()->m_AddrReg1->name == "EBP" || sentence->m_Operands.front()->m_AddrReg1->name == "ESP")
                 {
+                    if (sentence->m_Operands.front()->m_AddrReg1->name == "ESP" && sentence->m_Operands.front()->m_AddrReg2->name == "ESP")
+                    {
+                        sentence->m_Error = "error: Multiple base registers";
+                        return;
+                    }
+
+                    if (sentence->m_Operands.front()->m_AddrReg1->name == "EBP" && sentence->m_byteDisp == nullptr && sentence->m_Operands.front()->m_AddrReg2->name != "ESP")
+                    {
+                        sentence->m_byteDisp = new byte();
+                        sentence->m_DispBytesNum = 1;
+                    }
+
                     if (sentence->m_Operands.front()->m_SegPrefix->name != "SS") {
                         sentence->m_bytePrefix = new byte();
                         sentence->m_bytePrefix[0] = m_SegPrefs.at(sentence->m_Operands.front()->m_SegPrefix->name);

@@ -1,0 +1,142 @@
+0000							Data segment
+0000  C8                      	    Byte1 db 200 
+0001  D1 82 D0 B5 D1 81 D1 82	    String1 db "тестовий рядок - test string"
+      D0 BE D0 B2 D0 B8 D0 B9
+      20 D1 80 D1 8F D0 B4 D0
+      BE D0 BA 20 2D 20 74 65
+      73 74 20 73 74 72 69 6E
+      67
+002A  0B35                    	    Word1 dw 0cfh*1110b-29d
+002C  6FB24E9F                	    Dword1 dd 6fb24e9fh
+0030							Data ends
+
+ = 009D							equ1 equ equ3
+ = 31323334						equ2 equ "1234"
+ = 009D							equ3 equ 10011101b
+ = 028E							equ4 equ 654d
+ = 0214							equ5 equ 214h
+ = 000A8C4B						equ6 equ 0a8c4bh
+
+0000							Code segment
+0000								Begin:
+0000          F8              	    clc
+
+0001          0F 83   00000035	    jae l1
+0007          0F 83   000000C1	    jae l6
+
+000D  2E:     FE 0C18         	    dec byte ptr cs:[eax+ebx]
+0011      66| FF 4C11 02      	    dec word ptr ds:[ecx+edx+2]
+0016  26: 66| FF 4C11 04      	    dec word ptr es:[ecx+edx+4]
+001C  2E: 66| FF 4C11 06      	    dec word ptr cs:[ecx+edx+6]
+0022          FF 4C11 08      	    dec dword ptr ds:[ecx+edx+8]
+0026  26:     FF 8C11 12345678	    dec dword ptr es:[ecx+edx+12345678h]
+0000          FE 0C00         	    dec byte ptr Word2[eax+eax]
+error.asm(28): error: Symbol not defined: WORD2
+002E          FF 8C3E 0000002E	    dec Dword1[esi+edi+2]
+0035								l1:
+0035          02 C3           	    add al, bl
+0037          02 CA           	    add cl, dl
+0039          03 C0           	    add eax, eax
+003B          03 F7           	    add esi, edi
+
+0000          73              	    jae near ptr l22
+error.asm(36): error: Symbol not defined: L22
+003D          0F 83   0000004D	    jae near ptr l3
+
+0043          F6 F8           	l2: idiv al
+0045          F6 FF           	    idiv bh
+0047          F7 F8           	    idiv eax
+0049          F7 FA           	    idiv edx
+004B          F7 FE           	    idiv esi
+004D								l3:
+004D  2E:     3A 7C0D 00      	    cmp bh, byte ptr cs:[ebp+ecx]
+0052  26:     3A 0C30         	    cmp cl, byte ptr es:[eax+esi]
+0056          3A 543F 02      	    cmp dl, byte ptr ds:[edi+edi+2]
+005A  2E:     3B 4418 04      	    cmp eax, byte ptr cs:[eax+ebx+4]
+error.asm(48): warning: Operand types must match
+005F  2E:     3B 5C13 04      	    cmp ebx, dword ptr cs:[ebx+edx+4]
+0064          3B 743B 06      	    cmp esi, dword ptr ds:[ebx+edi+6]
+0068  26:     3B 743B 06      	    cmp esi, dword ptr es:[ebx+edi+6]
+006D          3A 8403 00000000	    cmp al, Byte1[ebx+eax]
+0074          3A B432 00000008	    cmp dh, Byte1[edx+esi+8]
+007B								l4:
+0000          	    and  ptr cs:[esi+ecx], 101111b
+error.asm(55): error: Operand expected
+0000          	    and byte ss:[ebp+ebx], 25
+error.asm(56): error: Operator expected
+007B  3E:     80 2425 30      	    and byte ptr ds:[ebp+esp], 48d
+0080  2E:     80 240B 2F      	    and byte ptr cs:[ebx+ecx], 101111b
+0085  26:     80 240B 9D      	    and byte ptr es:[ebx+ecx], equ3
+008A      66| 81 2418 74A2    	    and word ptr ds:[eax+ebx], 74a2h
+0090  2E: 66| 83 641A 02      	    and word ptr cs:[edx+ebx+2], 24h
+                      24
+0097          81 6410 04      	    and dword ptr ds:[eax+edx+4], equ2
+                      34333231
+009F          80 A436 00000001	    and String1[esi+esi], 54h
+                      54
+00A7          80 A407 00000001	    and String1[edi+eax], 'b'
+                      62
+00AF      66| 81 A418 00000030	    and Word1[eax+ebx+6], 133h
+                      0133
+00B9								l5:
+0000          73              	    jae Begin1
+error.asm(67): error: Symbol not defined: BEGIN1
+00B9          73      C0      	    jae l4
+00BB          0F 83   000000C1	    jae l6
+
+00C1          B0      61      	l6: mov al, 'a'
+00C3          B4      01      	    mov ah, 1
+00C5          B3      0F      	    mov bl, 0fh
+00C7          B8      34333231	    mov eax, equ2
+00CC          B9      6E727473	    mov ecx, "strn"
+00D1          BF      00000001	    mov edi, 1d
+00D6          BF      000FFFFF	    mov edi, 0FFFFFh
+
+00DB          0F 83   000000E7	    jae l7
+00E1          0F 83   000000FD	    jae l8
+00E7								l7:
+00E7  2E:     30 1C03         	    xor byte ptr cs:[ebx+eax], bl
+00EB          31 5C32 02      	    xor dword ptr ds:[edx+esi+2], ebx
+00EF          30 9439 00000000	    xor Byte1[ecx+edi], dl
+00F6          31 8C31 00000030	    xor Dword1[ecx+esi+4], ecx
+00FD								l8:
+00FD							Code ends
+								end
+
+
+
+                N a m e         	Size	Length
+
+DATA . . . . . . . . . . . . . . 	32 Bit	0030
+CODE . . . . . . . . . . . . . . 	32 Bit	00FD
+
+
+                N a m e         	Type	Value	Attr
+
+BYTE1  . . . . . . . . . . . . . 	L BYTE	0000	DATA
+STRING1  . . . . . . . . . . . . 	L BYTE	0001	DATA
+
+WORD1  . . . . . . . . . . . . . 	L WORD	002A	DATA
+
+DWORD1 . . . . . . . . . . . . . 	L DWORD	002C	DATA
+
+EQU1 . . . . . . . . . . . . . . 	NUMBER	009D
+EQU2 . . . . . . . . . . . . . . 	NUMBER	31323334
+EQU3 . . . . . . . . . . . . . . 	NUMBER	009D
+EQU4 . . . . . . . . . . . . . . 	NUMBER	028E
+EQU5 . . . . . . . . . . . . . . 	NUMBER	0214
+EQU6 . . . . . . . . . . . . . . 	NUMBER	A8C4B
+
+BEGIN  . . . . . . . . . . . . . 	L NEAR	0000	CODE
+L1 . . . . . . . . . . . . . . . 	L NEAR	0035	CODE
+L2 . . . . . . . . . . . . . . . 	L NEAR	0043	CODE
+L3 . . . . . . . . . . . . . . . 	L NEAR	004D	CODE
+L4 . . . . . . . . . . . . . . . 	L NEAR	007B	CODE
+L5 . . . . . . . . . . . . . . . 	L NEAR	00B9	CODE
+L6 . . . . . . . . . . . . . . . 	L NEAR	00C1	CODE
+L7 . . . . . . . . . . . . . . . 	L NEAR	00E7	CODE
+L8 . . . . . . . . . . . . . . . 	L NEAR	00FD	CODE
+
+
+      1 Warning Errors
+      5 Severe  Errors
